@@ -19,7 +19,7 @@ export default function Dashboard({ navigation }) {
       <View style={styles.footer}>
       <TouchableOpacity
           style={[styles.footerButton, { backgroundColor: 'white' }]}
-          onPress={() => handleCardClick('Profile')}
+          onPress={() => handleCardClick('Profiles')}
         >
           <AntDesign name="user" size={20} color="#002535" />
         </TouchableOpacity>

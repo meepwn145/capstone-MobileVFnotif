@@ -32,13 +32,13 @@ const Map = () => {
   const searchContainerStyle = {
     height: 60,
     position: 'absolute',
-    top: Constants.statusBarHeight + 10, // Adjust for the status bar height on iOS
+    top: Constants.statusBarHeight + 10, 
     left: 0,
     right: 0,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'black',
     paddingHorizontal: 16,
     paddingTop: 10,
     shadowColor: 'rgba(0, 0, 0, 0.3)',
@@ -52,20 +52,16 @@ const Map = () => {
   };
 
   const onPlaceChanged = () => {
-    // Replace this function with the logic to handle the autocomplete results
+  
   };
 
   useEffect(() => {
-    // Load recent searches from local storage on component mount
-    // Replace this logic with your implementation
     const savedRecentSearches = [];
     setRecentSearches(savedRecentSearches);
   }, []);
 
   useEffect(() => {
-    // Save recent searches to local storage whenever it changes
-    // Replace this logic with your implementation
-    // localStorage.setItem('recentSearches', JSON.stringify(recentSearches));
+
   }, [recentSearches]);
 
   return (
@@ -82,6 +78,7 @@ const Map = () => {
             style={{
               width: '100%',
               height: 40,
+              marginBottom: 10,
               borderRadius: 3,
               backgroundColor: '#f2f2f2',
               fontSize: 14,

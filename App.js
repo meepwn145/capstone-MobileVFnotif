@@ -11,6 +11,8 @@ import MapsScreen from './Map';
 import NextScreen from './Next';
 import LoginScreen from './Login';
 import SignUpScreen from './SignUp';
+import Profs from './Profiles'
+import FeedbackScreen from './Feedback'
 
 const Stack = createNativeStackNavigator();
 
@@ -29,6 +31,8 @@ export default function App() {
         <Stack.Screen name="Next" component={NextScreen} />
         <Stack.Screen name="Login" component={LoginScreen} />
         <Stack.Screen name="SignUp" component={SignUpScreen} />
+        <Stack.Screen name="Profiles" component={Profs} />
+        <Stack.Screen name="Feedback" component={FeedbackScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
