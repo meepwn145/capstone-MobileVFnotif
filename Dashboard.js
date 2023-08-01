@@ -49,7 +49,7 @@ export default function Dashboard({ navigation }) {
           style={[styles.footerButton, { backgroundColor: 'white' }]}
           onPress={() => handleCardClick('Map')}
         >
-          <AntDesign name="enviroment" size={20} color="#002535" />
+          <AntDesign name="bars" size={20} color="#002535" />
         </TouchableOpacity>
 
       </View>

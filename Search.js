@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, Image } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 const data = [
-  { id: '1', name: 'Oakridge Parking Lot' },
-  { id: '2', name: 'CSGI Parking Lot' },
-  { id: '3', name: 'Mandaue City Parking Building' },
-  { id: '4', name: 'Metro Supermarket Carpark' },
-  { id: '5', name: 'Viking Parking Lot' },
+  { id: '1', name: 'Oakridge Parking Lot', address: '880 A. S. Fortuna St, Mandaue City, 6014 Cebu',imageUrl: 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/18/dd/3b/9a/getlstd-property-photo.jpg?w=1200&h=-1&s=1' },
+  { id: '2', name: 'CSGI Parking Lot', address: 'Light Site, A. S. Fortuna St, Mandaue City, Cebu', imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaR-K35gwLVxcYumYF-BXijxj3uhI1lplD_CXrgbxXfg&s' },
+  { id: '3', name: 'Mandaue City Parking Building', address: '8WGV+H5P, 6014 P. Gomez, Mandaue, Lalawigan ng Cebu', imageUrl: 'https://149361674.v2.pressablecdn.com/wp-content/uploads/2017/08/MANDAUE-CITY-PARKING-BUILDING.jpg' },
+  { id: '4', name: 'Metro Supermarket Carpark', address: 'A. S. Fortuna St, Mandaue City, Cebu', imageUrl: 'https://i.prcdn.co/img?regionKey=Fu%2FxpATbN14yiyXrg6pzKA%3D%3D' },
+  { id: '5', name: 'Viking Parking Lot', address: 'North Wing, SM City Cebu, 2nd, Juan Luna Ext, Cebu City, 6000 Cebu', imageUrl: 'https://lh4.ggpht.com/-FL3f1l0PbKA/Tl3bdc55pJI/AAAAAAAAUUc/HK6n1MPnP_k/Vikings%252520Luxury%252520Buffet%252520MOA001%25255B3%25255D.jpg?imgmax=800' },
 ];
 
 export default function Search() {
   const [searchText, setSearchText] = useState('');
   const [filteredData, setFilteredData] = useState([]);
+
+  const navigation = useNavigation();
 
   const handleSearch = (text) => {
     setSearchText(text);
@@ -22,14 +25,15 @@ export default function Search() {
   };
 
   const handleItemClick = (item) => {
-    // You can do something with the clicked item here
-    console.log('Clicked item:', item);
+
+    navigation.navigate('Details', { item });
   };
 
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => handleItemClick(item)}>
       <View style={styles.item}>
-        <Text>{item.name}</Text>
+        <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
+        <Text style={styles.itemName}>{item.name}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -77,9 +81,20 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   item: {
+    flexDirection: 'row',
+    alignItems: 'center',
     padding: 10,
     borderBottomWidth: 1,
     borderBottomColor: 'gray',
+  },
+  itemImage: {
+    width: 40,
+    height: 40,
+    marginRight: 10,
+    resizeMode: 'cover',
+  },
+  itemName: {
+    fontSize: 16,
   },
   searchContainerStyle: {
     height: 100,
