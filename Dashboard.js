@@ -1,10 +1,17 @@
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity,   } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, TouchableWithoutFeedback } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 
 export default function Dashboard({ navigation }) {
+  const [isSidebarVisible, setSidebarVisible] = useState(false);
+
   const handleCardClick = (screenName) => {
+    setSidebarVisible(false);
     navigation.navigate(screenName);
+  };
+
+  const handleBarsClick = () => {
+    setSidebarVisible(!isSidebarVisible);
   };
 
   return (
@@ -17,7 +24,7 @@ export default function Dashboard({ navigation }) {
       />
 
       <View style={styles.footer}>
-      <TouchableOpacity
+        <TouchableOpacity
           style={[styles.footerButton, { backgroundColor: 'white' }]}
           onPress={() => handleCardClick('Profiles')}
         >
@@ -47,12 +54,53 @@ export default function Dashboard({ navigation }) {
 
         <TouchableOpacity
           style={[styles.footerButton, { backgroundColor: 'white' }]}
-          onPress={() => handleCardClick('Map')}
+          onPress={handleBarsClick}
         >
           <AntDesign name="bars" size={20} color="#002535" />
         </TouchableOpacity>
-
       </View>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={isSidebarVisible}
+      >
+         <View style={styles.sidebarContainer}>
+    <TouchableWithoutFeedback onPress={handleBarsClick}>
+      <View style={styles.sidebar}>
+        <TouchableOpacity
+          style={styles.sidebarButton}
+          onPress={() => handleCardClick('Dashboard')}
+        >
+          <View style={styles.buttonContent}>
+            <Image
+              source={{
+                uri: 'https://w7.pngwing.com/pngs/848/762/png-transparent-computer-icons-home-house-home-angle-building-rectangle-thumbnail.png',
+              }}
+              style={styles.logo}
+            />
+            <Text style={styles.sidebarButtonText}>Home</Text>
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity  
+          style={styles.sidebarButton}
+          onPress={() => handleCardClick('Feedback')}
+        >
+           <View style={styles.buttonContent}>
+            <Image
+              source={{
+                uri: 'https://png.pngtree.com/element_our/sm/20180313/sm_5aa7b9f6636d2.jpg',
+              }}
+              style={styles.logo}
+            />
+            <Text style={styles.sidebarButtonText}>Feedback</Text>
+          </View>
+        </TouchableOpacity>
+        {/* Add more buttons as needed */}
+      </View>
+    </TouchableWithoutFeedback>
+  </View>
+      </Modal>
     </View>
   );
 }
@@ -65,7 +113,7 @@ const styles = StyleSheet.create({
   navbar: {
     width: '100%',
     height: '25%',
-    resizeMode:'stretch',
+    resizeMode: 'stretch',
     marginBottom: 20,
   },
   footer: {
@@ -96,5 +144,35 @@ const styles = StyleSheet.create({
     color: '#000',
     fontSize: 20,
     fontWeight: 'bold',
+  },
+  sidebarContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'flex-start',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  sidebar: {
+    width: '80%',
+    backgroundColor: 'white',
+    padding: 25,
+    borderRadius: 15,
+  },
+  sidebarButton: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ccc',
+  },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  sidebarButtonText: {
+    fontSize: 15,
+    marginLeft: 25,
+  },
+  logo: {
+    width: 35,
+    height: 35,
+    resizeMode: 'contain',
   },
 });
