@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 
 export default function GcashScreen({ navigation }) {
   const [gcashNumber, setGcashNumber] = useState('');
@@ -76,7 +76,7 @@ export default function GcashScreen({ navigation }) {
 
       <Text style={styles.para}>Please note that several billers charge a service fee</Text>
       <TouchableOpacity style={styles.button} onPress={showAmountForm ? handlePayNow : handleConfirmPayment}>
-        <Text style={styles.buttonText}>{showAmountForm ? 'Pay Now' : 'Confirm Payment'}</Text>
+        <Text style={styles.buttonText}>{showAmountForm ? 'Pay Now' : 'Proceed'}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -140,4 +140,5 @@ const styles = StyleSheet.create({
     fontSize: 14,
     marginBottom: 10,
   },
+  
 });
