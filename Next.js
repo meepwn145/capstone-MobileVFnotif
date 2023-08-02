@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 
+
 export function NextScreen({ navigation }) {
   const handleGoToDashboard = () => {
     navigation.navigate('Dashboard');
@@ -15,9 +16,7 @@ export function NextScreen({ navigation }) {
   return (
     <View style={styles.container}>
       <Image
-        source={{
-          uri: 'https://scontent.fceb2-1.fna.fbcdn.net/v/t1.15752-9/364409165_298245242765459_1939857550581027986_n.png?_nc_cat=106&ccb=1-7&_nc_sid=ae9488&_nc_eui2=AeGH8ceYN0OHIYcmDG7ZPRrgbO7D2w_v0Fds7sPbD-_QV4P_uFjgu3QI2_YGKamA-1PwUOPMWVoEcFSM2q3jFaWo&_nc_ohc=yzRgVQ2QvdUAX90hfND&_nc_ht=scontent.fceb2-1.fna&oh=03_AdSsZ8kD8a0pAH3cUE5zmTWuBKi3fAOrdz-39PExaEWJQg&oe=64EEF0DB',
-        }}
+       source={require('./images/SpotLogo.png')}
         style={styles.image}
       />
        <TouchableOpacity style={styles.button} onPress={handleGoToLogin}>
@@ -31,21 +30,19 @@ export function NextScreen({ navigation }) {
         <TouchableOpacity style={styles.button}>
           <Text style={styles.buttonText}>
           <Image
-            source={{
-              uri: 'https://img.freepik.com/premium-vector/vinnitsyaukrainejanuary-24-2021facebook-vector-image-flat-icon-with-letter-f-blue-color-button-with-letter-isolated-white-background_736051-65.jpg', 
-            }}
-            style={styles.logo}
-          />Facebook</Text>
+       source={require('./images/facebook.png')}
+        style={styles.logo}
+        />
+         Facebook</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={[styles.button, { marginLeft: 10}]}>
           <Text style={styles.buttonText}>
           <Image
-            source={{
-              uri: 'https://www.freepnglogos.com/uploads/google-logo-png/google-logo-png-webinar-optimizing-for-success-google-business-webinar-13.png', 
-            }}
-            style={styles.logo}
-          />Google</Text>
+           source={require('./images/google.png')}
+           style={styles.logo}
+           />
+         Google</Text>
         </TouchableOpacity>
       </View>
     </View>

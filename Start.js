@@ -9,9 +9,7 @@ export function Start({ navigation }) {
   return (
     <View style={styles.container}>
       <Image
-        source={{
-          uri: 'https://scontent.fmnl4-3.fna.fbcdn.net/v/t1.15752-9/364235122_799619608294146_8800638788154199028_n.png?_nc_cat=108&ccb=1-7&_nc_sid=ae9488&_nc_eui2=AeEN7A4FQHKIlj_q8ph_TiR2QOuJ28FYsANA64nbwViwA-HBc72N6oZbdjqI2xfpdD1OkoWpeWTmZWeETXZgiYuh&_nc_ohc=VypliUW_Cu0AX9APtQm&_nc_ht=scontent.fmnl4-3.fna&oh=03_AdQiYvLOqInboduwGQcrA52OopREtkVjw6w68iH43V1uUQ&oe=64EEECA4',
-        }}
+       source={require('./images/Start.png')}
         style={styles.image}
       />
       <Text style={styles.startText}>Find a suitable parking area near your location</Text>

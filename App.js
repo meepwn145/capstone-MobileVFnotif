@@ -13,7 +13,10 @@ import SignupScreen from './Signup';
 import Profs from './Profiles'
 import FeedbackScreen from './Feedback'
 import DetailsScreen from './Details'
-
+import TransactionScreen from './Transaction';
+import GcashScreen from "./GcashForm"
+import PaypalScreen from "./PaypalForm"
+import ReceiptScreen from "./ReceiptForm"
 
 const Stack = createNativeStackNavigator();
 
@@ -34,6 +37,10 @@ export default function App() {
         <Stack.Screen name="Profiles" component={Profs} />
         <Stack.Screen name="Feedback" component={FeedbackScreen} />
         <Stack.Screen name="Details" component={DetailsScreen} />
+        <Stack.Screen name="Transaction" component={TransactionScreen} />
+        <Stack.Screen name="GcashForm" component={GcashScreen} />
+        <Stack.Screen name="PaypalForm" component={PaypalScreen} />
+        <Stack.Screen name="ReceiptForm" component={ReceiptScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

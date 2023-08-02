@@ -25,9 +25,9 @@ export default function Search() {
   };
 
   const handleItemClick = (item) => {
-
     navigation.navigate('Details', { item });
   };
+
 
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => handleItemClick(item)}>

@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, TouchableWithoutFeedback } from 'react-native';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, TouchableWithoutFeedback, FlatList } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 
 export default function Dashboard({ navigation }) {
   const [isSidebarVisible, setSidebarVisible] = useState(false);
+  const carouselImages = [
+    require('./images/parking1.jpg'),
+    require('./images/parking2.jpg'),
+    require('./images/parking3.png'),
+    require('./images/parking4.jpg'),
+  ];
 
   const handleCardClick = (screenName) => {
     setSidebarVisible(false);
@@ -14,14 +20,60 @@ export default function Dashboard({ navigation }) {
     setSidebarVisible(!isSidebarVisible);
   };
 
+  // Automatic carousel
+  const flatListRef = useRef(null);
+  const scrollInterval = useRef(null);
+
+  useEffect(() => {
+    scrollInterval.current = setInterval(() => {
+      if (flatListRef.current) {
+        flatListRef.current.scrollToIndex({
+          index: (currentIndex + 1) % carouselImages.length,
+          animated: true,
+        });
+      }
+    }, 3000);
+
+    return () => clearInterval(scrollInterval.current);
+  }, []);
+
+  const onViewableItemsChanged = useRef(({ viewableItems }) => {
+    if (viewableItems.length > 0) {
+      currentIndex = viewableItems[0].index;
+    }
+  }).current;
+
+  let currentIndex = 0;
+
+  const renderCarouselItem = ({ item }) => {
+    return <Image source={item} style={styles.carouselImage} />;
+  };
+
   return (
     <View style={styles.container}>
-      <Image
-        source={{
-          uri: 'https://scontent.fceb2-1.fna.fbcdn.net/v/t1.15752-9/364409165_298245242765459_1939857550581027986_n.png?_nc_cat=106&ccb=1-7&_nc_sid=ae9488&_nc_eui2=AeGH8ceYN0OHIYcmDG7ZPRrgbO7D2w_v0Fds7sPbD-_QV4P_uFjgu3QI2_YGKamA-1PwUOPMWVoEcFSM2q3jFaWo&_nc_ohc=yzRgVQ2QvdUAX90hfND&_nc_ht=scontent.fceb2-1.fna&oh=03_AdSsZ8kD8a0pAH3cUE5zmTWuBKi3fAOrdz-39PExaEWJQg&oe=64EEF0DB',
-        }}
-        style={styles.navbar}
-      />
+      <Image source={require('./images/Parking.png')} style={styles.navbar} />
+
+      <View style={styles.logoContainer}>
+        <Text style={styles.logoText}>Explore more available Parking Lots</Text>
+        <Text style={styles.logoSubText}>Find and Reserve Parking Spaces</Text>
+      </View>
+
+      <View style={styles.carouselContainer}>
+        <FlatList
+          ref={flatListRef}
+          data={carouselImages}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={renderCarouselItem}
+          onViewableItemsChanged={onViewableItemsChanged}
+          viewabilityConfig={{
+            itemVisiblePercentThreshold: 50,
+          }}
+        />
+      </View>
+
 
       <View style={styles.footer}>
         <TouchableOpacity
@@ -65,41 +117,48 @@ export default function Dashboard({ navigation }) {
         transparent={true}
         visible={isSidebarVisible}
       >
-         <View style={styles.sidebarContainer}>
-    <TouchableWithoutFeedback onPress={handleBarsClick}>
-      <View style={styles.sidebar}>
-        <TouchableOpacity
-          style={styles.sidebarButton}
-          onPress={() => handleCardClick('Dashboard')}
-        >
-          <View style={styles.buttonContent}>
-            <Image
-              source={{
-                uri: 'https://w7.pngwing.com/pngs/848/762/png-transparent-computer-icons-home-house-home-angle-building-rectangle-thumbnail.png',
-              }}
-              style={styles.logo}
-            />
-            <Text style={styles.sidebarButtonText}>Home</Text>
-          </View>
-        </TouchableOpacity>
-        <TouchableOpacity  
-          style={styles.sidebarButton}
-          onPress={() => handleCardClick('Feedback')}
-        >
-           <View style={styles.buttonContent}>
-            <Image
-              source={{
-                uri: 'https://png.pngtree.com/element_our/sm/20180313/sm_5aa7b9f6636d2.jpg',
-              }}
-              style={styles.logo}
-            />
-            <Text style={styles.sidebarButtonText}>Feedback</Text>
-          </View>
-        </TouchableOpacity>
-        {/* Add more buttons as needed */}
-      </View>
-    </TouchableWithoutFeedback>
-  </View>
+        <View style={styles.sidebarContainer}>
+          <TouchableWithoutFeedback onPress={handleBarsClick}>
+            <View style={styles.sidebar}>
+              <TouchableOpacity
+                style={styles.sidebarButton}
+                onPress={() => handleCardClick('Dashboard')}
+              >
+                <View style={styles.buttonContent}>
+                  <Image
+                    source={require('./images/home.png')}
+                    style={styles.logo}
+                  />
+                  <Text style={styles.sidebarButtonText}>Home</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.sidebarButton}
+                onPress={() => handleCardClick('Feedback')}
+              >
+                <View style={styles.buttonContent}>
+                  <Image
+                    source={require('./images/like.jpg')}
+                    style={styles.logo}
+                  />
+                  <Text style={styles.sidebarButtonText}>Feedback</Text>
+                </View>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.sidebarButton}
+                onPress={() => handleCardClick('Transaction')}
+              >
+                <View style={styles.buttonContent}>
+                  <Image
+                    source={require('./images/transaction.png')}
+                    style={styles.logo}
+                  />
+                  <Text style={styles.sidebarButtonText}>Transaction</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          </TouchableWithoutFeedback>
+        </View>
       </Modal>
     </View>
   );
@@ -112,7 +171,7 @@ const styles = StyleSheet.create({
   },
   navbar: {
     width: '100%',
-    height: '25%',
+    height: '30%',
     resizeMode: 'stretch',
     marginBottom: 20,
   },
@@ -174,5 +233,26 @@ const styles = StyleSheet.create({
     width: 35,
     height: 35,
     resizeMode: 'contain',
+  },
+  carouselContainer: {
+    height: 300,
+  },
+  carouselImage: {
+    width: 300, 
+    height: 300,
+    resizeMode: 'cover',
+  },
+  logoContainer: {
+    alignItems: 'center',
+  },
+  logoText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  logoSubText: {
+    fontSize: 12,
+    color: '#f5f5f5',
+    marginBottom: 10,
   },
 });
