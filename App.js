@@ -17,14 +17,14 @@ import TransactionScreen from './Transaction';
 import GcashScreen from "./GcashForm"
 import PaypalScreen from "./PaypalForm"
 import ReceiptScreen from "./ReceiptForm"
-
+import ParkScreen from "./Park"
 const Stack = createNativeStackNavigator();
 
 export default function App() {
 
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Dashboard">
+      <Stack.Navigator initialRouteName="Dasboard">
         <Stack.Screen name="Start" component={Start} options={{ headerShown: false }} />
         <Stack.Screen name="Dashboard" component={DashboardScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Settings" component={SettingsScreen} />
@@ -41,6 +41,7 @@ export default function App() {
         <Stack.Screen name="GcashForm" component={GcashScreen} />
         <Stack.Screen name="PaypalForm" component={PaypalScreen} />
         <Stack.Screen name="ReceiptForm" component={ReceiptScreen} />
+        <Stack.Screen name="Park" component={ParkScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

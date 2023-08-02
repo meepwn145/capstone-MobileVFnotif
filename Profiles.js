@@ -29,7 +29,7 @@ const Profs = () => {
 
   const renderInputWithIcon = (iconName, value, onChangeText, placeholder) => (
     <View style={styles.inputContainer}>
-      <AntDesign name={iconName} size={20} color="#002535" style={styles.icon} />
+      <AntDesign name={iconName} size={20} color="white" style={styles.icon} />
       <TextInput
         style={styles.input}
         value={value}

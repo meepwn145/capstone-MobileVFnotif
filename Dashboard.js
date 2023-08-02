@@ -156,6 +156,18 @@ export default function Dashboard({ navigation }) {
                   <Text style={styles.sidebarButtonText}>Transaction</Text>
                 </View>
               </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.sidebarButton}
+                onPress={() => handleCardClick('Park')}
+              >
+                <View style={styles.buttonContent}>
+                  <Image
+                    source={require('./images/p.png')}
+                    style={styles.logo}
+                  />
+                  <Text style={styles.sidebarButtonText}>Parking</Text>
+                </View>
+              </TouchableOpacity>
             </View>
           </TouchableWithoutFeedback>
         </View>
