@@ -1,17 +1,27 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
-const handleGoToDashboard = () => {
+export function LoginScreen() {
+  const navigation = useNavigation(); // Move the useNavigation hook inside the functional component
+
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+
+  const handleGoToDashboard = () => {
     navigation.navigate('Dashboard');
   };
-export function LoginScreen() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+
+  const handleForgotPassword = () => {
+    navigation.navigate('Forgot');
+  };
+
+  const handleLogin = () => {
+    console.log('Email:', email);
+    console.log('Password:', password);
+    handleGoToDashboard();
+  };
   
-    const handleLogin = () => {
-      console.log('Email:', email);
-      console.log('Password:', password);
-    };
 
   return (
     <View style={styles.container}>
@@ -21,7 +31,7 @@ export function LoginScreen() {
         }}
         style={styles.image}
       />
-       <Text style={styles.title}>Log In</Text>
+      <Text style={styles.title}>Log In</Text>
       <TextInput
         style={styles.input}
         placeholder="Email"
@@ -38,7 +48,10 @@ export function LoginScreen() {
         secureTextEntry
       />
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText} onPress={handleGoToDashboard}>Login</Text>
+        <Text style={styles.buttonText}>Login</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.forgotButton} onPress={handleForgotPassword}>
+        <Text style={styles.forgotButtonText}>Forgot Password</Text>
       </TouchableOpacity>
     </View>
   );
@@ -61,8 +74,8 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 15,
     marginTop: 40,
-    fontFamily:'Courier New',
-    textAlign:'center'
+    fontFamily: 'Courier New',
+    textAlign: 'center',
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -74,7 +87,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginBottom: 20,
     color: 'white',
-    fontFamily:'Courier New'
+    fontFamily: 'Courier New',
   },
   input: {
     width: '80%',
@@ -84,8 +97,8 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 10,
     paddingHorizontal: 10,
-    fontFamily:'Courier New',
-    backgroundColor:'#FFFFFF'
+    fontFamily: 'Courier New',
+    backgroundColor: '#FFFFFF',
   },
   button: {
     marginTop: 20,
@@ -95,18 +108,29 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginTop: 10,
   },
+  forgotButton: {
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    marginTop: 10,
+  },
   logo: {
     width: 15,
     height: 15,
     marginRight: 10,
     resizeMode: 'contain',
-    alignItems:'left',
+    alignItems: 'left',
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
-    fontFamily:'Courier New',
-    textAlign:'center',
+    fontFamily: 'Courier New',
+    textAlign: 'center',
+  },
+  forgotButtonText: {
+    color: '#3b89ac',
+    fontSize: 16,
+    fontFamily: 'Courier New',
+    textAlign: 'center',
   },
 });
 

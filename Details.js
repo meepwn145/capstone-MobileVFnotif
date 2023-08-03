@@ -15,6 +15,7 @@ export default function DetailsScreen({ route }) {
         <Image source={{ uri: item.imageUrl }} style={styles.image} />
         <Text style= {styles.para}>Located at</Text>
         <Text style={styles.address}>{item.address}</Text>
+        <Text style={styles.para}>Available Parking Space: {item.space}</Text>
       </View>
       <TouchableOpacity onPress={() => navigation.navigate('Map')} style={styles.button}>
         <Text style={styles.buttonText}>Direction</Text>
