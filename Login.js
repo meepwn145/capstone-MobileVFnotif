@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from './config/firebase';
 
 export function LoginScreen() {
-  const navigation = useNavigation(); // Move the useNavigation hook inside the functional component
+  const navigation = useNavigation();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -16,10 +18,15 @@ export function LoginScreen() {
     navigation.navigate('Forgot');
   };
 
-  const handleLogin = () => {
-    console.log('Email:', email);
-    console.log('Password:', password);
-    handleGoToDashboard();
+  const handleLogin = async () => {
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log('Login successful!');
+
+      handleGoToDashboard();
+    } catch (error) {
+      console.error('Error logging in: ', error);
+    }
   };
   
 

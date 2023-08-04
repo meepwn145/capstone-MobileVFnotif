@@ -8,7 +8,7 @@ function ParkScreen() {
   const [loadingComplete, setLoadingComplete] = useState(false);
 
   useEffect(() => {
-    const timerDuration = 30;
+    const timerDuration = 30  ;
     let currentTime = 0;
 
     const interval = setInterval(() => {
