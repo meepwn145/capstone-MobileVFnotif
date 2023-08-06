@@ -22,7 +22,7 @@ export function SignupScreen() {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
 
-      const userRef = collection(db, 'users');
+      const userRef = collection(db, 'user');
       await addDoc(userRef, {
         name,
         email,
@@ -32,6 +32,7 @@ export function SignupScreen() {
         gender,
         car,
         carPlateNumber,
+        password,
       });
 
       console.log('Signup successful!');
@@ -45,12 +46,6 @@ export function SignupScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-         <Image
-        source={{
-          uri: 'https://scontent.fceb2-1.fna.fbcdn.net/v/t1.15752-9/364409165_298245242765459_1939857550581027986_n.png?_nc_cat=106&ccb=1-7&_nc_sid=ae9488&_nc_eui2=AeGH8ceYN0OHIYcmDG7ZPRrgbO7D2w_v0Fds7sPbD-_QV4P_uFjgu3QI2_YGKamA-1PwUOPMWVoEcFSM2q3jFaWo&_nc_ohc=yzRgVQ2QvdUAX90hfND&_nc_ht=scontent.fceb2-1.fna&oh=03_AdSsZ8kD8a0pAH3cUE5zmTWuBKi3fAOrdz-39PExaEWJQg&oe=64EEF0DB',
-        }}
-        style={styles.image}
-      />
       <Text style={styles.title}>Create Account</Text>
       <TextInput
         style={styles.input}
@@ -86,6 +81,12 @@ export function SignupScreen() {
         value={contactNumber}
         onChangeText={setContactNumber}
         keyboardType="phone-pad"
+      />
+       <TextInput
+        style={styles.input}
+        placeholder="Age"
+        value={age}
+        onChangeText={setAge}
       />
      <View style={styles.genderContainer}>
         <Text style={styles.label}>Gender:</Text>
