@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginLeft: 10,
     fontSize: 18,
-    marginTop: 10,
+    marginTop: 5,
     textAlign: 'center',
   },
   subTitle: {

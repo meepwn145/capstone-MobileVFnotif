@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, ScrollView} from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { color } from 'react-native-elements/dist/helpers';
 
@@ -29,7 +29,7 @@ const Profs = () => {
 
   const renderInputWithIcon = (iconName, value, onChangeText, placeholder) => (
     <View style={styles.inputContainer}>
-      <AntDesign name={iconName} size={20} color="white" style={styles.icon} />
+      <AntDesign name={iconName} size={20} color="black" style={styles.icon} />
       <TextInput
         style={styles.input}
         value={value}
@@ -41,16 +41,20 @@ const Profs = () => {
   );
 
   return (
+    <ScrollView contentContainerStyle={styles.scrollViewContent}>
     <View style={styles.container}>
-          <Text style={styles.text}>Profile Information</Text>
+        <View style={styles.profileContainer}>
+          <Image
+            source={require('./images/gilbert.jpg')}
+            style={styles.profileImage}
+          />
+          <Text style={styles.profileEmail}>{email}</Text>
+        </View>
       {renderInputWithIcon('user', name, setName, 'Name')}
-      {renderInputWithIcon('mail', email, setEmail, 'Email')}
       {renderInputWithIcon('enviroment', location, setLocation, 'Location')}
       {renderInputWithIcon('phone', phone, setPhone, 'Phone')}
-      <Text style={styles.text}>Additional Information</Text>
       {renderInputWithIcon('', age, setAge, 'Age')}
       {renderInputWithIcon('', gender, setGender, 'gender')}
-      <Text style={styles.text}>Vehicle Information</Text>
       {renderInputWithIcon('car', vehicle, setVehicle, 'Vehicle')}
       {renderInputWithIcon('dashboard', plateNumber, setPlateNumber, 'Plate')}
       {isEditMode ? (
@@ -66,21 +70,43 @@ const Profs = () => {
         <Text style={styles.logoutButtonText}>Logout</Text>
       </TouchableOpacity>
     </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollViewContent: {
+    flexGrow: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'white',
+  },
+  profileContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    marginBottom: 10,
+  },
+  profileEmail: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
   container: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'black',
+    backgroundColor: 'white',
   },
   text: {
-    fontFamily:'Courier New',
+    fontFamily:'Georgina',
     fontWeight:'bold',
     marginTop: 5,
-    color: 'white'
+    color: 'black'
   },
   inputContainer: {
     flexDirection: 'row',
@@ -94,8 +120,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#333',
     paddingVertical: 10,
-    fontFamily:'Courier New',
-    color:'white',
+    fontFamily:'Georgina',
+    color:'black',
     fontWeight:'bold'
   },
   icon: {
@@ -130,9 +156,10 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 5,
+    backgroundColor:'red'
   },
   logoutButtonText: {
-    color: '#fff',
+    color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
   },

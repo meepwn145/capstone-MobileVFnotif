@@ -49,7 +49,7 @@ function ParkScreen() {
       <Text style={styles.para}>Parking Fee: 30 PHP</Text>
       <View style={styles.imageContainer}>
         {loadingComplete && renderTimeUpButton()}
-        <Image source={require('./images/car.png')} style={styles.image} />
+        <Image source={require('./images/carp.jpg')} style={styles.image} />
         <View 
         style={[styles.loadingLine, { width: `${loadingPercentage}%` }]} />
       </View>

@@ -3,6 +3,8 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
+
+
 const firebaseConfig = {
   apiKey: "AIzaSyCDuoGHrM9DLaWmtGeVn2BnBsC1BOLGGCo",
   authDomain: "spotwise-e1514.firebaseapp.com",
@@ -14,9 +16,10 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const googleProvider = new GoogleAuthProvider();
-const db = getFirestore(app);
 const storage = getStorage(app);
 
-export { auth, googleProvider, db, storage };  
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export { googleProvider, storage };
+export default app;
