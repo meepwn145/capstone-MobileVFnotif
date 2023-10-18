@@ -44,6 +44,7 @@ export default function App() {
         <Stack.Screen name="ReceiptForm" component={ReceiptScreen} />
         <Stack.Screen name="Park" component={ParkScreen} />
         <Stack.Screen name="Forgot" component={ForgotScreen} />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

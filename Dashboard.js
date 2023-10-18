@@ -7,7 +7,7 @@ export default function Dashboard({ route  }) {
   const navigation = useNavigation();
   const { user } = route.params;
   const goToProfile = () => {
-    navigation.navigate('Profiles', { user });
+    navigation.navigate('Profiles', { user});
   };
   
   const [isSidebarVisible, setSidebarVisible] = useState(false);
@@ -85,12 +85,10 @@ export default function Dashboard({ route  }) {
       <View style={styles.footer}>
         <TouchableOpacity
           style={[styles.footerButton, { backgroundColor: 'white' }]}
-          onPress={() => navigation.navigate('Profiles', { user })}
+          onPress={goToProfile}
         >
-             <Button title="Go to Profile" onPress={goToProfile} />
           <AntDesign name="user" size={20} color="#002535" />
         </TouchableOpacity>
-
         <TouchableOpacity
           style={[styles.footerButton, { backgroundColor: 'white' }]}
           onPress={() => handleCardClick('Search')}
