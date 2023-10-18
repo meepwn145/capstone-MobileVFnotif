@@ -1,8 +1,15 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, TouchableWithoutFeedback, FlatList } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, TouchableWithoutFeedback, FlatList, Button } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
-export default function Dashboard({ navigation }) {
+export default function Dashboard({ route  }) {
+  const navigation = useNavigation();
+  const { user } = route.params;
+  const goToProfile = () => {
+    navigation.navigate('Profiles', { user });
+  };
+  
   const [isSidebarVisible, setSidebarVisible] = useState(false);
   const carouselImages = [
     require('./images/parking1.jpg'),
@@ -78,8 +85,9 @@ export default function Dashboard({ navigation }) {
       <View style={styles.footer}>
         <TouchableOpacity
           style={[styles.footerButton, { backgroundColor: 'white' }]}
-          onPress={() => handleCardClick('Profiles')}
+          onPress={() => navigation.navigate('Profiles', { user })}
         >
+             <Button title="Go to Profile" onPress={goToProfile} />
           <AntDesign name="user" size={20} color="#002535" />
         </TouchableOpacity>
 
@@ -90,12 +98,7 @@ export default function Dashboard({ navigation }) {
           <AntDesign name="earth" size={20} color="#002535" />
         </TouchableOpacity>
 
-        <TouchableOpacity
-          style={[styles.footerButton, { backgroundColor: 'white' }]}
-          onPress={() => handleCardClick('Dashboard')}
-        >
-          <AntDesign name="home" size={20} color="#002535" />
-        </TouchableOpacity>
+      
 
         <TouchableOpacity
           style={[styles.footerButton, { backgroundColor: 'white' }]}
@@ -120,18 +123,7 @@ export default function Dashboard({ navigation }) {
         <View style={styles.sidebarContainer}>
           <TouchableWithoutFeedback onPress={handleBarsClick}>
             <View style={styles.sidebar}>
-              <TouchableOpacity
-                style={styles.sidebarButton}
-                onPress={() => handleCardClick('Dashboard')}
-              >
-                <View style={styles.buttonContent}>
-                  <Image
-                    source={require('./images/home.png')}
-                    style={styles.logo}
-                  />
-                  <Text style={styles.sidebarButtonText}>Home</Text>
-                </View>
-              </TouchableOpacity>
+             
               <TouchableOpacity
                 style={styles.sidebarButton}
                 onPress={() => handleCardClick('Feedback')}

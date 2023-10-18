@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from './config/firebase';
+import { auth, db } from './config/firebase';
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 
 export function LoginScreen() {
   const navigation = useNavigation();
@@ -10,9 +11,9 @@ export function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleGoToDashboard = () => {
-    navigation.navigate('Dashboard');
-  };
+  const handleGoToDashboard = (user) => {
+    navigation.navigate('Profiles', { user });
+};
 
   const handleForgotPassword = () => {
     navigation.navigate('Forgot');
@@ -20,14 +21,41 @@ export function LoginScreen() {
 
   const handleLogin = async () => {
     try {
+      // Authenticate with Firebase
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      console.log('Login successful!');
-
-      handleGoToDashboard();
+  
+      // Safety check to ensure user exists in the userCredential
+      if (!userCredential || !userCredential.user) {
+        console.error('User not found in userCredential');
+        return;
+      }
+  
+      const { user } = userCredential;
+      console.log('Authentication successful for UID:', user.uid);
+  
+  
+      const userDocRef = doc(db, "user", user.uid);
+  
+      const userDoc = await getDoc(userDocRef);
+  
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        console.log('User data fetched from Firestore:', userData);
+        
+    
+        navigation.navigate('Dashboard', { user: userData });
+      } else {
+        console.error(`No user data found in Firestore for user: ${user.uid}`);
+      }
     } catch (error) {
-      console.error('Error logging in: ', error);
+      
+      console.error('Error logging in:', error.message || error);
+  
     }
   };
+  
+  
+  
   
 
   return (

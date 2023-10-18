@@ -4,16 +4,19 @@ import { AntDesign } from '@expo/vector-icons';
 import { color } from 'react-native-elements/dist/helpers';
 
 
-const Profs = () => {
-  const [name, setName] = useState('Gilbert Canete');
-  const [email, setEmail] = useState('jasonzzz@gmail.com');
-  const [location, setLocation] = useState('Labangon');
-  const [phone, setPhone] = useState('0912345789');
-  const [age, setAge] = useState('21');
-  const [gender, setGender] = useState('Male');
-  const [vehicle, setVehicle] = useState('Fortuner');
-  const [plateNumber, setPlateNumber] = useState('ABC-123');
+const Profs = ({ route }) => {
+  const { user } = route.params;
+  const [name, setName] = useState(user?.name || '');
+  const [email, setEmail] = useState(user?.email || '');
+  const [address, setAddress] = useState(user?.address ||'');
+  const [phone, setPhone] = useState(user?.contactNumber||'');
+  const [age, setAge] = useState(user?.age || '');
+  const [gender, setGender] = useState(user?.gender || '');
+  const [vehicle, setVehicle] = useState(user?.car||'');
+  const [plateNumber, setPlateNumber] = useState(user?.carPlateNumber || '');
   const [isEditMode, setIsEditMode] = useState(false);
+  const [users, setUser] = useState(null);
+
 
   const handleLogout = () => {
     console.log('Logout pressed');
@@ -48,10 +51,10 @@ const Profs = () => {
             source={require('./images/gilbert.jpg')}
             style={styles.profileImage}
           />
-          <Text style={styles.profileEmail}>{email}</Text>
+          <Text style={styles.profileEmail}>{user.email}</Text>
         </View>
       {renderInputWithIcon('user', name, setName, 'Name')}
-      {renderInputWithIcon('enviroment', location, setLocation, 'Location')}
+      {renderInputWithIcon('enviroment', address, setAddress, 'Location')}
       {renderInputWithIcon('phone', phone, setPhone, 'Phone')}
       {renderInputWithIcon('', age, setAge, 'Age')}
       {renderInputWithIcon('', gender, setGender, 'gender')}

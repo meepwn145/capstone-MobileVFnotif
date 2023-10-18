@@ -9,7 +9,7 @@ import SearchScreen from './Search';
 import MapsScreen from './Map';
 import NextScreen from './Next';
 import LoginScreen from './Login';
-import SignupScreen from './Signup';
+import SignupScreen from './SignUp';
 import Profs from './Profiles'
 import FeedbackScreen from './Feedback'
 import DetailsScreen from './Details'

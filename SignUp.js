@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, Alert, ScrollView } from 'react-native';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { collection, addDoc } from 'firebase/firestore';
+import { collection, addDoc, setDoc, doc } from 'firebase/firestore';
 import { auth, db } from './config/firebase'; 
 import { useNavigation } from '@react-navigation/native';
+
 
 export function SignupScreen() {
   const [name, setName] = useState('');
@@ -21,9 +22,11 @@ export function SignupScreen() {
   const handleSignup = async () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;  
 
-      const userRef = collection(db, 'user');
-      await addDoc(userRef, {
+    
+      const userRef = doc(db, 'user', user.uid); 
+      await setDoc(userRef, {
         name,
         email,
         address,
@@ -42,7 +45,8 @@ export function SignupScreen() {
       console.error('Error signing up: ', error);
       Alert.alert('Error', 'Registration failed. Please try again.', [{ text: 'OK' }]);
     }
-  };
+};
+
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
