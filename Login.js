@@ -40,8 +40,6 @@ export function LoginScreen() {
   
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        console.log('User data fetched from Firestore:', userData);
-        
     
         navigation.navigate('Dashboard', { user: userData });
       } else {

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, TextInput} from 'react-native';
-import { db } from "./config/firebase";
+import { db, storage } from "./config/firebase";
+import * as ImagePicker from 'expo-image-picker';
 
 
 const Profs = ({ route }) => {
-    const { user } = route.params;
+  const { user = {} } = route.params || {};
+  console.log(user);
     const [name, setName] = useState(user?.name || '');
     const [email, setEmail] = useState(user?.email || '');
     const [address, setAddress] = useState(user?.address ||'');
@@ -15,47 +17,96 @@ const Profs = ({ route }) => {
     const [plateNumber, setPlateNumber] = useState(user?.carPlateNumber || '');
     const [isEditMode, setIsEditMode] = useState(false);
     const [users, setUser] = useState(null);
+    const [profileImage, setProfileImage] = useState('./images/defualt.png');
+    
+    useEffect(() => {
+      // Request permission to access the device's image library
+      (async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          alert('Permission to access media library is required!');
+        }
+      })();
+    }, []);
 
-    const handleSave = async () => {
-      try {
-          // Check if the user or the UID is not defined.
-          if (!user || !user.uid) {
-              throw new Error("User or UID is undefined.");
-          }
-  
-          // Update the user's document in Firestore.
-          await db.collection('user')
-                  .doc(user.uid)
-                  .update({
-                      name: name,
-                      email: email,
-                      address: address,
-                      contactNumber: phone,
-                      age: age,
-                      gender: gender,
-                      car: vehicle,
-                      carPlateNumber: plateNumber,
-                  });
-  
-          // Notify the user that the profile was updated.
-          alert('Profile updated successfully!');
-          
-      } catch (error) {
-          // Log and display any errors.
-          console.error("Error updating profile: ", error.message);
-          alert(`Failed to update profile: ${error.message}`);
+    const handleImagePick = async () => {
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      if (!result.cancelled) {
+        setProfileImage(result.uri);
+        await uploadImage(result.uri);
       }
+    } catch (error) {
+      console.error("Error picking the image: ", error.message);
+    }
+  };
+
+
+  const uploadImage = async (uri) => {
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+  
+      const ref = storage.ref().child(`profilePictures/${user.uid}`);
+      await ref.put(blob);
+      const downloadURL = await ref.getDownloadURL();
+  
+      console.log(`Successfully uploaded file and got download link - ${downloadURL}`);
+      setProfileImage(downloadURL);
+      await db.collection('user').doc(user.uid).update({
+        profileImageUrl: downloadURL,
+      });
+    } catch (error) {
+      console.error("Error uploading image: ", error.message);
+    }
   };
   
 
-  const toggleEditMode = () => {
-    console.log("Toggling Edit Mode...");
-    if (isEditMode) {
-      console.log("Currently in Edit Mode...");
-      handleSave();
+  const handleSave = async () => {
+    try {
+        // Check if the user object is defined and has a uid.
+        if (!user || !user.uid) {
+            console.error("User or User UID is not defined.");
+            return;
+        }
+    
+        // Construct the data to save from the state.
+        const profileData = {
+            name: name,
+            email: email,
+            address: address,
+            contactNumber: phone,
+            age: age,
+            gender: gender,
+            car: vehicle,
+            carPlateNumber: plateNumber,
+            profileImageUrl: profileImage // Including the profile image URL.
+        };
+    
+        // Update the Firestore document.
+        await db.collection('user').doc(user.uid).set(profileData, { merge: true });
+    
+        alert('Profile updated successfully!');
+    } catch (error) {
+        console.error("Error updating the profile:", error.message);
+        alert("An error occurred while updating the profile.");
     }
-    setIsEditMode(!isEditMode);
- };
+};
+
+
+const toggleEditMode = () => {
+  if (isEditMode) {
+    handleSave();
+  }
+  setIsEditMode(!isEditMode);
+};
+  
 
   return (
     <ScrollView style={styles.container}>
@@ -64,10 +115,9 @@ const Profs = ({ route }) => {
           style={styles.coverPhoto}
           source={require('./images/coverD.jpg')}
         />
-        <Image
-          style={styles.profilePicture}
-          source={require('./images/defualt.png')}
-        />
+        <TouchableOpacity activeOpacity={isEditMode ? 0.7 : 1} onPress={isEditMode ? handleImagePick : null}>
+                <Image style={styles.profilePicture} source={isEditMode && profileImage ? {uri: profileImage} : require('./images/defualt.png')} />
+            </TouchableOpacity>
        
       </View>
         {isEditMode ? 

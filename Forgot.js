@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, Alert, StyleSheet } from 'react-native';
+import { sendPasswordResetEmail } from 'firebase/auth';
+import {auth} from "./config/firebase";
 
-const generateVerificationCode = () => {
-    return Math.floor(100000 + Math.random() * 900000);
-  };
   
   const isEmailValid = (email) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -13,22 +12,45 @@ const generateVerificationCode = () => {
   const ForgotScreen = () => {
     const [email, setEmail] = useState('');
     const [verificationCode, setVerificationCode] = useState(null);
+    const [enteredCode, setEnteredCode] = useState('');
+    const [newPassword, setNewPassword] = useState('');
+    const [isCodeSubmitted, setIsCodeSubmitted] = useState(false);
   
-    const handleResetPassword = () => {
+  
+    const handleSubmit = async () => {
       if (!isEmailValid(email)) {
         Alert.alert('Invalid Email', 'Please enter a valid email address.');
         return;
       }
   
-      const code = generateVerificationCode();
-      setVerificationCode(code);
-      Alert.alert('Verification Code Sent', `A verification code has been sent to ${email}`);
+      try {
+        await sendPasswordResetEmail(auth, email);
+        Alert.alert('Success', 'Password reset email sent. Check your inbox.');
+      } catch (error) {
+        console.error('Error sending password reset email:', error.message, 'Code:', error.code);
+        handleFirebaseError(error);
+      }
     };
+
+    const handleFirebaseError = (error) => {
+      switch (error.code) {
+        case 'auth/invalid-email':
+          Alert.alert('Error', 'Invalid email format.');
+          break;
+        case 'auth/user-not-found':
+          Alert.alert('Error', 'User with this email does not exist.');
+          break;
+        default:
+          Alert.alert('Error', 'An error occurred. Please try again later.');
+          break;
+      }
+    };
+
 
   return (
     <View style={styles.container}>
       <View style={styles.navbar}>
-        <Text style={styles.navbarTitle}>Reset Password</Text>
+        <Text style={styles.navbarTitle}>SpotWise Parking Management</Text>
       </View>
       <Text style={styles.label}>Enter your email address:</Text>
       <TextInput
@@ -39,23 +61,19 @@ const generateVerificationCode = () => {
         keyboardType="email-address"
         autoCapitalize="none"
       />
-      <Button title="Send verification code" onPress={handleResetPassword} />
-      {verificationCode && (
-        <View style={styles.codeForm}>
-          <Text style={styles.codeLabel}>Enter the 6-digit code:</Text>
-          <TextInput
-            style={styles.codeInput}
-            placeholder="Verification Code"
-            keyboardType="numeric"
-            maxLength={6}
-          />
-        </View>
-      )}
+      <Button title="Reset Password" onPress={handleSubmit} />
+      <Text style={styles.message}></Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  message: {
+    marginTop: 20,
+    fontSize: 16,
+    color: 'gray',
+    textAlign: 'center',
+  },
 container: {
     flex: 1,
     padding: 20,
