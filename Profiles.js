@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, TextInput} from 'react-native';
-import { db, storage } from "./config/firebase";
+import { db, storage, auth } from "./config/firebase";
 import * as ImagePicker from 'expo-image-picker';
+import { updateDoc, doc,getDoc } from 'firebase/firestore';
 
 
 const Profs = ({ route }) => {
@@ -16,8 +17,66 @@ const Profs = ({ route }) => {
     const [vehicle, setVehicle] = useState(user?.car||'');
     const [plateNumber, setPlateNumber] = useState(user?.carPlateNumber || '');
     const [isEditMode, setIsEditMode] = useState(false);
-    const [users, setUser] = useState(null);
     const [profileImage, setProfileImage] = useState('./images/defualt.png');
+
+    useEffect(() => {
+      const fetchUserData = async () => {
+        try {
+          const user = auth.currentUser;
+          if (user) {
+            const userId = user.uid;
+            const userDocRef = doc(db, 'user', userId);
+            const userDoc = await getDoc(userDocRef);
+            if (userDoc.exists()) {
+              const userData = userDoc.data();
+              setName(userData.name || "");
+              setAddress(userData.address || "");
+              setPhone(userData.contactNumber || "");
+              setAge(userData.age || "");
+              setGender(userData.gender || "");
+              setVehicle(userData.car || "");
+              setPlateNumber(userData.carPlateNumber || "");
+              setProfileImage(userData.profileImageUrl || './images/defualt.png');
+            } else {
+              console.log("No user data found!");
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching user data: ", error);
+        }
+      };
+  
+      fetchUserData();
+    }, []); 
+
+    const updateUserData = async () => {
+      try {
+        if (auth.currentUser) {
+          const userId = auth.currentUser.uid;
+          const userDocRef = doc(db, 'user', userId); 
+  
+          // Data to be updated or set
+          const updatedData = {
+            name: name,
+            address: address,
+            contactNumber:phone,
+            email: email,
+            vehicle: vehicle,
+            carPlateNumber:plateNumber,
+            age: age,
+          };
+  
+          // Using set with { merge: true } will either update or create the document
+          await updateDoc(userDocRef, updatedData);
+  
+          console.log("User data updated/created successfully!");
+        } else {
+          console.error("User not authenticated");
+        }
+      } catch (error) {
+        console.error("Error updating user data: ", error);
+      }
+  };
     
     useEffect(() => {
       // Request permission to access the device's image library
@@ -53,52 +112,28 @@ const Profs = ({ route }) => {
       const response = await fetch(uri);
       const blob = await response.blob();
   
-      const ref = storage.ref().child(`profilePictures/${user.uid}`);
+      const userId = auth.currentUser?.uid;
+      if (!userId) throw new Error("User ID not available for image upload");
+  
+      const ref = storage.ref().child(`profilePictures/${userId}`);
       await ref.put(blob);
       const downloadURL = await ref.getDownloadURL();
   
       console.log(`Successfully uploaded file and got download link - ${downloadURL}`);
       setProfileImage(downloadURL);
-      await db.collection('user').doc(user.uid).update({
+      await db.collection('user').doc(userId).update({
         profileImageUrl: downloadURL,
       });
     } catch (error) {
       console.error("Error uploading image: ", error.message);
     }
-  };
+};
   
 
-  const handleSave = async () => {
-    try {
-        // Check if the user object is defined and has a uid.
-        if (!user || !user.uid) {
-            console.error("User or User UID is not defined.");
-            return;
-        }
-    
-        // Construct the data to save from the state.
-        const profileData = {
-            name: name,
-            email: email,
-            address: address,
-            contactNumber: phone,
-            age: age,
-            gender: gender,
-            car: vehicle,
-            carPlateNumber: plateNumber,
-            profileImageUrl: profileImage // Including the profile image URL.
-        };
-    
-        // Update the Firestore document.
-        await db.collection('user').doc(user.uid).set(profileData, { merge: true });
-    
-        alert('Profile updated successfully!');
-    } catch (error) {
-        console.error("Error updating the profile:", error.message);
-        alert("An error occurred while updating the profile.");
-    }
+  const handleSave = () => {
+    console.log(auth.currentUser);
+    updateUserData();
 };
-
 
 const toggleEditMode = () => {
   if (isEditMode) {
@@ -116,7 +151,7 @@ const toggleEditMode = () => {
           source={require('./images/coverD.jpg')}
         />
         <TouchableOpacity activeOpacity={isEditMode ? 0.7 : 1} onPress={isEditMode ? handleImagePick : null}>
-                <Image style={styles.profilePicture} source={isEditMode && profileImage ? {uri: profileImage} : require('./images/defualt.png')} />
+        <Image style={styles.profilePicture} source={profileImage ? {uri: profileImage} : require('./images/defualt.png')} />
             </TouchableOpacity>
        
       </View>
