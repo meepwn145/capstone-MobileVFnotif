@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   startText: {
-    color: 'white',
+    color: '#E9DBBD',
     fontSize: 15,
     marginTop: 40,
     fontFamily:'Courier New',
@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    backgroundColor: '#3b89ac',
+    backgroundColor: '#A08C5B',
     borderRadius: 5,
     marginTop: 40
   },

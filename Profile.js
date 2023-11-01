@@ -8,7 +8,7 @@ import { Button } from 'react-native-elements';
 
 const Profs = ({ route }) => {
   const { user = {} } = route.params || {};
-
+  console.log(user);
     const [name, setName] = useState(user?.name || '');
     const [email, setEmail] = useState(user?.email || '');
     const [address, setAddress] = useState(user?.address ||'');
@@ -80,6 +80,58 @@ const Profs = ({ route }) => {
         console.error("Error updating user data: ", error);
       }
   };
+    
+    useEffect(() => {
+      // Request permission to access the device's image library
+      (async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          alert('Permission to access media library is required!');
+        }
+      })();
+    }, []);
+
+    const handleImagePick = async () => {
+    try {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.All,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+
+      if (!result.cancelled) {
+        setProfileImage(result.uri);
+        await uploadImage(result.uri);
+      }
+    } catch (error) {
+      console.error("Error picking the image: ", error.message);
+    }
+  };
+
+
+  const uploadImage = async (uri) => {
+    try {
+      const response = await fetch(uri);
+      const blob = await response.blob();
+  
+      const userId = auth.currentUser?.uid;
+      if (!userId) throw new Error("User ID not available for image upload");
+  
+      const ref = storage.ref().child(`profilePictures/${userId}`);
+      await ref.put(blob);
+      const downloadURL = await ref.getDownloadURL();
+  
+      console.log(`Successfully uploaded file and got download link - ${downloadURL}`);
+      setProfileImage(downloadURL);
+      await db.collection('user').doc(userId).update({
+        profileImageUrl: downloadURL,
+      });
+    } catch (error) {
+      console.error("Error uploading image: ", error.message);
+    }
+};
+  
 
   const handleSave = () => {
     console.log(auth.currentUser);
@@ -100,18 +152,18 @@ const toggleEditMode = () => {
         <Image
           style={styles.coverPhoto}
           source={require('./images/background.jpg')}
-        />  
+        />
+        <TouchableOpacity activeOpacity={isEditMode ? 0.7 : 1} onPress={isEditMode ? handleImagePick : null}>
+        <Image style={styles.profilePicture} source={profileImage ? {uri: profileImage} : require('./images/defualt.png')} />
+            </TouchableOpacity>
+       
       </View>
         {isEditMode ? 
             <TextInput 
-            style={[
-              styles.profileName, 
-              styles.infoInput,
-              isEditMode && styles.editModeInput
-          ]} 
+                style={[styles.profileName, styles.infoInput]} 
                 value={name} 
                 onChangeText={(text) => setName(text)}
-                placeholder="Name"  
+                placeholder="Name"
             /> :
             <Text style={styles.profileName}>{name}</Text>
         }
@@ -120,15 +172,16 @@ const toggleEditMode = () => {
                   </TouchableOpacity>
                   <View style={styles.infoSection}>
         <TouchableOpacity onPress={() => setIsInfoVisible(!isInfoVisible)}>
-        <Text style={{ fontWeight: 'bold', marginTop: 25, left: 10, fontSize:18 }}>User Information</Text>
+        <Text style={{ fontWeight: 'bold', marginTop: 20, textAlign: 'center'  }}>View User Information</Text>
         </TouchableOpacity>
 
-      
+        {isInfoVisible && (
+          <>
             <View style={styles.othersContainer}>
               <Image style={styles.others} source={require('./images/address.png')} />
               {isEditMode ? 
                   <TextInput 
-                      style={[styles.infoLabel, isEditMode && styles.editModeInput]} 
+                      style={styles.infoInput} 
                       value={address} 
                       onChangeText={(text) => setAddress(text)}
                       placeholder="Address"
@@ -141,7 +194,7 @@ const toggleEditMode = () => {
               <Image style={styles.others} source={require('./images/contact.png')} />
               {isEditMode ? 
                   <TextInput 
-                  style={[styles.infoLabel, isEditMode && styles.editModeInput]} 
+                      style={styles.infoInput} 
                       value={phone} 
                       onChangeText={(text) => setPhone(text)}
                       placeholder="Contact Number"
@@ -154,7 +207,7 @@ const toggleEditMode = () => {
               <Image style={styles.others} source={require('./images/age.png')} />
               {isEditMode ? 
                   <TextInput 
-                  style={[styles.infoLabel, isEditMode && styles.editModeInput]} 
+                      style={styles.infoInput} 
                       value={age} 
                       onChangeText={(text) => setAge(text)}
                       placeholder="Age"
@@ -167,7 +220,7 @@ const toggleEditMode = () => {
               <Image style={styles.others} source={require('./images/gender.png')} />
               {isEditMode ? 
                   <TextInput 
-                  style={[styles.infoLabel, isEditMode && styles.editModeInput]} 
+                      style={styles.infoInput} 
                       value={gender} 
                       onChangeText={(text) => setGender(text)}
                       placeholder="Gender"
@@ -180,7 +233,7 @@ const toggleEditMode = () => {
               <Image style={styles.others} source={require('./images/vehicle.png')} />
               {isEditMode ? 
                   <TextInput 
-                  style={[styles.infoLabel, isEditMode && styles.editModeInput]} 
+                      style={styles.infoInput} 
                       value={vehicle} 
                       onChangeText={(text) => setVehicle(text)}
                       placeholder="Vehicle"
@@ -193,7 +246,7 @@ const toggleEditMode = () => {
               <Image style={styles.others} source={require('./images/plate.png')} />
               {isEditMode ? 
                   <TextInput 
-                  style={[styles.infoLabel, isEditMode && styles.editModeInput]} 
+                      style={styles.infoInput} 
                       value={plateNumber} 
                       onChangeText={(text) => setPlateNumber(text)}
                       placeholder="Plate Number"
@@ -201,7 +254,10 @@ const toggleEditMode = () => {
                   <Text style={styles.info}>{plateNumber}</Text>
               }
             </View>
-      </View>  
+          </>
+        )}
+      </View>
+        
     </ScrollView>
   );
 }
@@ -234,10 +290,6 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
   },
-  editModeInput: {
-    borderBottomWidth: 2, 
-    borderColor: 'red',
-},
   editProfileButton: {
     marginTop: 20,
     marginHorizontal: 20,
@@ -258,8 +310,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   infoLabel: {
-    fontSize: 18,
-    color: 'black',
+    fontSize: 14,
+    color: '#666',
     marginTop: 10,
   },
   info: {

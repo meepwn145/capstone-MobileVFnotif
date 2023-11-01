@@ -158,6 +158,18 @@ export default function Dashboard({ route  }) {
                   <Text style={styles.sidebarButtonText}>Parking</Text>
                 </View>
               </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.sidebarButton}
+                onPress={() => handleCardClick('Start')}
+              >
+                <View style={styles.buttonContent}>
+                  <Image
+                    source={require('./images/logout.png')}
+                    style={styles.logo}
+                  />
+                  <Text style={styles.sidebarButtonText}>Log Out</Text>
+                </View>
+              </TouchableOpacity>
             </View>
           </TouchableWithoutFeedback>
         </View>

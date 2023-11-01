@@ -1,28 +1,48 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, FlatList, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import {db} from "./config/firebase";
+import { collection, query, where, getDocs } from 'firebase/firestore';
 
-const data = [
-  { id: '1', name: 'Oakridge Parking Lot', address: '880 A. S. Fortuna St, Mandaue City, 6014 Cebu',imageUrl: 'https://dynamic-media-cdn.tripadvisor.com/media/photo-o/18/dd/3b/9a/getlstd-property-photo.jpg?w=1200&h=-1&s=1', space: '27'},
-  { id: '2', name: 'CSGI Parking Lot', address: 'Light Site, A. S. Fortuna St, Mandaue City, Cebu', imageUrl: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaR-K35gwLVxcYumYF-BXijxj3uhI1lplD_CXrgbxXfg&s', space: '35' },
-  { id: '3', name: 'Mandaue City Parking Building', address: '8WGV+H5P, 6014 P. Gomez, Mandaue, Lalawigan ng Cebu', imageUrl: 'https://149361674.v2.pressablecdn.com/wp-content/uploads/2017/08/MANDAUE-CITY-PARKING-BUILDING.jpg', space: '28' },
-  { id: '4', name: 'Metro Supermarket Carpark', address: 'A. S. Fortuna St, Mandaue City, Cebu', imageUrl: 'https://i.prcdn.co/img?regionKey=Fu%2FxpATbN14yiyXrg6pzKA%3D%3D', space: '42'},
-  { id: '5', name: 'Viking Parking Lot', address: 'North Wing, SM City Cebu, 2nd, Juan Luna Ext, Cebu City, 6000 Cebu', imageUrl: 'https://lh4.ggpht.com/-FL3f1l0PbKA/Tl3bdc55pJI/AAAAAAAAUUc/HK6n1MPnP_k/Vikings%252520Luxury%252520Buffet%252520MOA001%25255B3%25255D.jpg?imgmax=800', space: '15' },
-];
+
 
 export default function Search() {
   const [searchText, setSearchText] = useState('');
   const [filteredData, setFilteredData] = useState([]);
+  const [allData, setAllData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const navigation = useNavigation();
 
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const q = query(collection(db, 'establishments'));
+        const querySnapshot = await getDocs(q);
+        const fetchedData = querySnapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setAllData(fetchedData);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching data: ", error);
+        setLoading(false);
+      }
+    };
+  
+    fetchData();
+  }, []);
+
   const handleSearch = (text) => {
     setSearchText(text);
-    const filteredItems = data.filter((item) =>
-      item.name.toLowerCase().includes(text.toLowerCase())
+    const filteredItems = allData.filter((item) =>
+      (item.companyAddress?.toLowerCase() || "" ).includes(text.toLowerCase())
     );
     setFilteredData(filteredItems);
   };
+  
 
   const handleItemClick = (item) => {
     navigation.navigate('Details', { item });
@@ -33,7 +53,9 @@ export default function Search() {
     <TouchableOpacity onPress={() => handleItemClick(item)}>
       <View style={styles.item}>
         <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
-        <Text style={styles.itemName}>{item.name}</Text>
+        <View style={{flex:1}}>
+        <Text style={styles.itemName}>{item.companyAddress}</Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
