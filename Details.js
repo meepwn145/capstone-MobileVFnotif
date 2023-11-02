@@ -15,7 +15,7 @@ export default function DetailsScreen({ route }) {
         <Image source={{ uri: item.imageUrl }} style={styles.image} />
         <Text style= {styles.para}>Located at</Text>
         <Text style={styles.address}>{item.companyAddress}</Text>
-        <Text style={styles.para}>Available Parking Space: {item.numberOfParkingLots}</Text>
+        <Text style={styles.para2}>Available Parking Space: {item.numberOfParkingLots}</Text>
       </View>
       <TouchableOpacity onPress={() => navigation.navigate('Map')} style={styles.button}>
         <Text style={styles.buttonText}>Direction</Text>
@@ -53,6 +53,10 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     marginBottom: 10,
   },
+  para2: {
+    marginTop: 30,
+    fontSize: 18,
+  },
   para: {
     marginTop: 10,
     fontSize: 18,
@@ -77,7 +81,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   address: {
-    marginTop: 20,
     color: 'gray',
+    fontSize: 15,
   },
 });
