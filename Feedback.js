@@ -5,6 +5,8 @@ import {db} from "./config/firebase";
 import { collection, query, where, getDocs, addDoc} from 'firebase/firestore';
 import { useState, useEffect } from 'react';
 import style from 'react-native-modal-picker/style';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+
 
 function FeedbackScreen() {
   const [managementName, setManagementName] = useState('');
@@ -15,20 +17,31 @@ function FeedbackScreen() {
   const [message, setMessage] = useState('');
   const navigation = useNavigation();
 
+  const [user, setUser] = useState(null);
+
+useEffect(() => {
+  const auth = getAuth();
+  const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    setUser(currentUser);
+  });
+  // Cleanup subscription on unmount
+  return () => unsubscribe();
+}, []);
+
   const handleSubmit = async () => {
-    // You might want to include validation here before attempting to save
+    if (!user) {
+      Alert.alert('Error', 'You must be logged in to submit feedback.');
+      return;
+    }
     try {
       await addDoc(collection(db, 'feedback'), {
         managementName,
         companyAddress,
         email,
         message,
-        // You might want to add a timestamp or other relevant information
         createdAt: new Date()
       });
-      // Clear the form or navigate away, or give the user feedback
       Alert.alert('Success', 'Your feedback has been submitted.');
-      // If you wish to clear the state
       setManagementName('');
       setCompanyAddress('');
       setEmail('');
@@ -39,6 +52,11 @@ function FeedbackScreen() {
     }
   };
 
+  useEffect(() => {
+    if (user) {
+      setEmail(user.email);
+    }
+  }, [user]);
 
   const fetchMatchingNames = async (partialName) => {
     try {
@@ -77,7 +95,7 @@ function FeedbackScreen() {
       console.error('Error searching management name:', error);
       Alert.alert('Error', 'An error occurred while searching. Please try again.');
     }
-    setMatchingManagementNames([]); // Clear suggestions
+    setMatchingManagementNames([]);
     setModalVisible(false);
   };
   
@@ -139,15 +157,15 @@ function FeedbackScreen() {
         style={styles.input}
         placeholder="your_email@example.com"
         keyboardType="email-address"
+        value={email}
         onChangeText={setEmail} 
+        editable={false}
       />
       <Text>Message</Text>
       <TextInput
         style={styles.input}
         placeholder="Message"
         keyboardType="default"
-        multiline
-        numberOfLines={5} 
         value={message}
         onChangeText={setMessage}
       />
