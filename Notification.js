@@ -1,37 +1,81 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { getFirestore, collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { db, auth } from './config/firebase';
+
 
 export default function Notifications() {
   const navigation = useNavigation();
-  return (
+  const [parkingLocation, setParkingLocation] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [parkingStatus, setParkingStatus] = useState('');
+
+  useEffect(() => {
+    // Attach the auth state change listener
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const userID = user.email;
+        // Construct the query for the latest parking location
+        const q = query(collection(db, 'logs'), where('email', '==', userID), orderBy('timestamp', 'desc'), limit(1));
+  
+        // Listen for changes on the latest parking location
+        const unsubscribeLogs = onSnapshot(q, (snapshot) => {
+          if (!snapshot.empty) {
+            const data = snapshot.docs[0].data();
+            setParkingLocation(data.managementName);
+            setParkingStatus(data.paymentStatus);
+            
+            // Check the payment status and notify the user if pending
+            if (data.paymentStatus === 'Pending') {
+              // Notify the user
+              
+            }
+            else if (data.paymentStatus === 'Paid'){
+                alert("Please disregard the notification since your payment has already settled.")
+            }
+          } else {
+            setParkingLocation('No parking record found.');
+          }
+          setLoading(false);
+        }, (err) => {
+          console.error(`Encountered error: ${err}`);
+          setLoading(false);
+        });
+  
+        // Detach the logs listener when the component unmounts or auth state changes
+        return () => unsubscribeLogs();
+      } else {
+        setParkingLocation('User is not logged in.');
+        setLoading(false);
+      }
+    });
+  
+    // Detach the auth listener when the component unmounts
+    return () => unsubscribeAuth();
+  }, []);
+
+  if (loading) {
+    return <View style={styles.container}><Text>Loading...</Text></View>;
+  }
+
+   return (
     <View style={styles.container}>
       <View style={styles.navbar}>
         <Text style={styles.navbarTitle}>Notifications</Text>
       </View>
       <View style={styles.content}>
-        <Text style={styles.label}>Read Message</Text>
-        <TextInput
-          style={styles.textarea}
-          multiline
-          numberOfLines={3}
-          placeholder="You have successfully paid 30php on Country Mall Gaisano Parking Lot."
-        />
-        <Text style={styles.label}>Unread Message</Text>
-        <TextInput
-          style={[styles.textarea, { color: 'blue' }]}
-          multiline
-          numberOfLines={3}
-          placeholder="Your parking session has expired. Move your vehicle outside the parking area to avoid penalties."
-          placeholderTextColor="blue" 
-        />
-        <TextInput
-          style={styles.textarea}
-          multiline
-          numberOfLines={3}
-          placeholder="Don't forget where you parked! Your car is in Zone A, Level 2, Slot 15."
-          placeholderTextColor="blue" 
-        />
+        <Text style={styles.notificationText}>
+          {parkingLocation
+            ? `You have parked at ${parkingLocation}.`
+            : "You don't have any parking records."}
+        </Text>
+        <Text style={styles.notificationText}>
+          {parkingLocation
+            ? `You have a ${parkingStatus} payment status at ${parkingLocation} Parking Establishment.`
+            : "You don't have any parking records."}
+        </Text>
       </View>
       <TouchableOpacity onPress={() => navigation.navigate('Dashboard')} style={styles.button}>
         <Text style={styles.buttonText}>Back</Text>
@@ -39,6 +83,7 @@ export default function Notifications() {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: {
@@ -52,31 +97,22 @@ const styles = StyleSheet.create({
   },
   navbarTitle: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
     textAlign: 'center',
-    fontSize: 20,
     marginTop: 20,
   },
   content: {
-    marginTop: 20, 
     flex: 1,
+    marginTop: 20,
   },
-  label: {
-    marginTop: 5,
+  notificationText: {
     fontSize: 16,
-    fontWeight: 'bold',
-  },
-  textarea: {
-    borderColor: 'gray',
+    padding: 10,
+    marginVertical: 5,
     borderWidth: 1,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+    borderColor: '#ccc',
     borderRadius: 5,
-    height: 100,
-    textAlignVertical: 'top',
-    paddingTop: 10,
-    marginTop: 10,
   },
   button: {
     backgroundColor: 'black',
@@ -85,10 +121,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
     marginTop: 20,
-    marginBottom: 20, 
-    position: 'absolute', 
-    bottom: 0, 
-    width: '100%', 
+    marginBottom: 20,
+    position: 'absolute',
+    bottom: 0,
+    width: '100%',
     marginLeft: 20,
   },
   buttonText: {
