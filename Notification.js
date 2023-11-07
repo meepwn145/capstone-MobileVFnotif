@@ -1,42 +1,44 @@
 import React, {useState, useEffect} from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, collection, query, where, orderBy, limit, onSnapshot } from 'firebase/firestore';
+import { getFirestore, collection, query, where, orderBy, limit, onSnapshot, deleteDoc, doc} from 'firebase/firestore';
 import { db, auth } from './config/firebase';
+import { Button } from 'react-native-elements';
 
 
 export default function Notifications() {
   const navigation = useNavigation();
-  const [parkingLocation, setParkingLocation] = useState('');
   const [loading, setLoading] = useState(true);
-  const [parkingStatus, setParkingStatus] = useState('');
+  const [parkingLogs, setParkingLogs] = useState([]);
+  const [selectedId, setSelectedId] = useState(null);
+  const toggleSelection = (id) => {
+    setSelectedId(selectedId === id ? null : id); // Toggle selection
+  };
 
   useEffect(() => {
-    // Attach the auth state change listener
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
         const userID = user.email;
-        // Construct the query for the latest parking location
-        const q = query(collection(db, 'logs'), where('email', '==', userID), orderBy('timestamp', 'desc'), limit(1));
+        // Construct the query for all parking logs for the user
+        const q = query(collection(db, 'logs'), where('email', '==', userID), orderBy('timestamp', 'desc'));
   
-        // Listen for changes on the latest parking location
         const unsubscribeLogs = onSnapshot(q, (snapshot) => {
           if (!snapshot.empty) {
-            const data = snapshot.docs[0].data();
-            setParkingLocation(data.managementName);
-            setParkingStatus(data.paymentStatus);
-            
-            // Check the payment status and notify the user if pending
-            if (data.paymentStatus === 'Pending') {
-              // Notify the user
-              
-            }
-            else if (data.paymentStatus === 'Paid'){
-                alert("Please disregard the notification since your payment has already settled.")
-            }
+            const logs = snapshot.docs.map(doc => {
+              const data = doc.data();
+              return {
+                id: doc.id,
+                managementName: data.managementName,
+                paymentStatus: data.paymentStatus,
+                timestamp: data.timestamp, 
+                timeIn: data.timeIn,
+                timeOut: data.timeOut,
+              };
+            });
+            setParkingLogs(logs);
           } else {
-            setParkingLocation('No parking record found.');
+            setParkingLogs([]);
           }
           setLoading(false);
         }, (err) => {
@@ -44,43 +46,96 @@ export default function Notifications() {
           setLoading(false);
         });
   
-        // Detach the logs listener when the component unmounts or auth state changes
         return () => unsubscribeLogs();
       } else {
-        setParkingLocation('User is not logged in.');
         setLoading(false);
       }
     });
   
-    // Detach the auth listener when the component unmounts
     return () => unsubscribeAuth();
   }, []);
+
 
   if (loading) {
     return <View style={styles.container}><Text>Loading...</Text></View>;
   }
 
-   return (
-    <View style={styles.container}>
+  const formatDuration = (timeIn, timeOut) => {
+    if (!timeIn || !timeOut) return 'N/A';
+  
+    const start = new Date(timeIn.seconds * 1000);
+    const end = new Date(timeOut.seconds * 1000);
+    const duration = end - start;
+  
+    // Convert milliseconds to minutes
+    const minutes = Math.floor(duration / 60000);
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+  
+    return `${hours}h ${remainingMinutes}m`;
+  };
+
+  const deleteNotification = async (id) => {
+    try {
+      // Delete the notification from the database
+      await deleteDoc(doc(db, 'logs', id));
+      console.log('Notification deleted successfully');
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+    }
+  };
+
+  return (
+    <ScrollView style={styles.container}>
       <View style={styles.navbar}>
-        <Text style={styles.navbarTitle}>Notifications</Text>
+        <Text style={styles.navbarTitle}>Parking History</Text>
       </View>
       <View style={styles.content}>
-        <Text style={styles.notificationText}>
-          {parkingLocation
-            ? `You have parked at ${parkingLocation}.`
-            : "You don't have any parking records."}
-        </Text>
-        <Text style={styles.notificationText}>
-          {parkingLocation
-            ? `You have a ${parkingStatus} payment status at ${parkingLocation} Parking Establishment.`
-            : "You don't have any parking records."}
-        </Text>
+        {parkingLogs.length > 0 ? (
+          parkingLogs.map((log) => (
+            <TouchableOpacity
+              key={log.id}
+              style={styles.notification}
+              onPress={() => toggleSelection(log.id)}
+            >
+              <Text style={styles.notificationText}>
+                Parked at: {log.managementName}
+              </Text>
+              <Text style={styles.notificationText}>
+                Payment Status: {log.paymentStatus}
+              </Text>
+              <Text style={styles.notificationText}>
+                Duration: {formatDuration(log.timeIn, log.timeOut)}
+              </Text>
+              <Text style={styles.notificationDate}>
+                Date: {new Date(log.timestamp.seconds * 1000).toLocaleDateString()} 
+                {'\ '} {log.timeIn ? new Date(log.timeIn.seconds * 1000).toLocaleTimeString() : 'N/A'} {'\ '}
+                {log.timeOut ? new Date(log.timeOut.seconds * 1000).toLocaleTimeString() : 'N/A'}
+              </Text>
+              {selectedId === log.id && (
+                <TouchableOpacity
+                  onPress={() => deleteNotification(log.id)}
+                  style={styles.deleteButton}
+                >
+                    <Image 
+                      source={require('./images/del.png')}
+                      style={styles.deleteButtonImage}
+                    />
+                </TouchableOpacity>
+              )}
+            </TouchableOpacity>
+          ))
+        ) : (
+          <Text style={styles.notificationText}>You have no new Notifications</Text>
+        )}
       </View>
+      
+      <View>
       <TouchableOpacity onPress={() => navigation.navigate('Dashboard')} style={styles.button}>
         <Text style={styles.buttonText}>Back</Text>
       </TouchableOpacity>
-    </View>
+      </View>
+    </ScrollView>
   );
 }
 
@@ -106,13 +161,22 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: 20,
   },
-  notificationText: {
-    fontSize: 16,
+  notification: {
     padding: 10,
     marginVertical: 5,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 5,
+    backgroundColor: '#fff', // or any other color for non-clicked notification
+  },
+  notificationText: {
+    fontSize: 16,
+    padding: 10,
+  },
+  notificationDate: {
+    fontSize: 14,
+    padding: 10,
+    color: 'gray', // style for the date text
   },
   button: {
     backgroundColor: 'black',
@@ -120,16 +184,32 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 5,
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 20,
-    position: 'absolute',
+    marginTop: 10,
+    marginBottom: 10,
+    position: 'center',
     bottom: 0,
     width: '100%',
-    marginLeft: 20,
   },
   buttonText: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  notificationClicked: {
+    backgroundColor: 'gray', 
+  },
+  deleteButton: {
+    position: 'absolute',
+    top: 120,
+    right: 10,
+    
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 5,
+  },
+  deleteButtonImage: {
+    width: 30, // Adjust the width as needed
+    height: 30, // Adjust the height as needed
+    resizeMode: 'contain', // This ensures the image is scaled proportionately
   },
 });

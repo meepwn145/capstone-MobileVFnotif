@@ -1,13 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, TextInput} from 'react-native';
-import { db, storage, auth } from "./config/firebase";
+import { db, storage, auth} from "./config/firebase";
 import * as ImagePicker from 'expo-image-picker';
 import { updateDoc, doc,getDoc } from 'firebase/firestore';
 import { Button } from 'react-native-elements';
+import UserContext from './UserContext';
 
 
-const Profs = ({ route }) => {
-  const { user = {} } = route.params || {};
+const Profs = () => {
+  const { user } = useContext(UserContext);
 
     const [name, setName] = useState(user?.name || '');
     const [email, setEmail] = useState(user?.email || '');
@@ -25,13 +26,13 @@ const Profs = ({ route }) => {
     useEffect(() => {
       const fetchUserData = async () => {
         try {
-          const user = auth.currentUser;
-          if (user) {
-            const userId = user.uid;
+          if (auth.currentUser) {
+            const userId = auth.currentUser.uid;
             const userDocRef = doc(db, 'user', userId);
-            const userDoc = await getDoc(userDocRef);
-            if (userDoc.exists()) {
-              const userData = userDoc.data();
+            const userDocSnapshot = await getDoc(userDocRef);
+  
+            if (userDocSnapshot.exists()) {
+              const userData = userDocSnapshot.data();
               setName(userData.name || "");
               setAddress(userData.address || "");
               setPhone(userData.contactNumber || "");
@@ -39,7 +40,6 @@ const Profs = ({ route }) => {
               setGender(userData.gender || "");
               setVehicle(userData.car || "");
               setPlateNumber(userData.carPlateNumber || "");
-              setProfileImage(userData.profileImageUrl || './images/defualt.png');
             } else {
               console.log("No user data found!");
             }
@@ -50,28 +50,23 @@ const Profs = ({ route }) => {
       };
   
       fetchUserData();
-    }, []); 
+    }, [user]);
 
     const updateUserData = async () => {
       try {
         if (auth.currentUser) {
           const userId = auth.currentUser.uid;
-          const userDocRef = doc(db, 'user', userId); 
-  
-          // Data to be updated or set
+          const userDocRef = doc(db, 'user', userId);
           const updatedData = {
             name: name,
             address: address,
-            contactNumber:phone,
-            email: email,
-            vehicle: vehicle,
-            carPlateNumber:plateNumber,
+            contactNumber: phone,
             age: age,
+            gender: gender,
+            car: vehicle,
+            carPlateNumber: plateNumber,
           };
-  
-          // Using set with { merge: true } will either update or create the document
           await updateDoc(userDocRef, updatedData);
-  
           console.log("User data updated/created successfully!");
         } else {
           console.error("User not authenticated");
@@ -79,7 +74,7 @@ const Profs = ({ route }) => {
       } catch (error) {
         console.error("Error updating user data: ", error);
       }
-  };
+    };
 
   const handleSave = () => {
     console.log(auth.currentUser);

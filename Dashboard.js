@@ -1,13 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, Modal, TouchableWithoutFeedback, FlatList, Button } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import UserContext from './UserContext';
 
-export default function Dashboard({ route  }) {
+
+export default function Dashboard() {
   const navigation = useNavigation();
-  const { user } = route.params;
+  const { user } = useContext(UserContext);
+
   const goToProfile = () => {
-    navigation.navigate('Profiles', { user});
+    navigation.navigate('Profiles', { user });
   };
   
   const [isSidebarVisible, setSidebarVisible] = useState(false);
