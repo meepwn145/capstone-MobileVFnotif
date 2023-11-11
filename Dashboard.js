@@ -12,6 +12,7 @@ export default function Dashboard() {
   const goToProfile = () => {
     navigation.navigate('Profiles', { user });
   };
+
   
   const [isSidebarVisible, setSidebarVisible] = useState(false);
   const carouselImages = [

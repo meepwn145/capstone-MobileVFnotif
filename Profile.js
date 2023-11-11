@@ -1,14 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView, TextInput} from 'react-native';
-import { db, storage, auth } from "./config/firebase";
+import { db, storage, auth} from "./config/firebase";
 import * as ImagePicker from 'expo-image-picker';
 import { updateDoc, doc,getDoc } from 'firebase/firestore';
 import { Button } from 'react-native-elements';
+import UserContext from './UserContext';
+import {ref, uploadBytes, getDownloadURL, listAll, list  } from "firebase/storage"
+import { Platform } from 'react-native';
+import {v4} from "uuid"; 
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
-
-const Profs = ({ route }) => {
-  const { user = {} } = route.params || {};
-  console.log(user);
+const Profs = () => {
+  const { user } = useContext(UserContext);
+  const [profileImageUrl, setProfileImageUrl] = useState("");
     const [name, setName] = useState(user?.name || '');
     const [email, setEmail] = useState(user?.email || '');
     const [address, setAddress] = useState(user?.address ||'');
@@ -18,20 +22,79 @@ const Profs = ({ route }) => {
     const [vehicle, setVehicle] = useState(user?.car||'');
     const [plateNumber, setPlateNumber] = useState(user?.carPlateNumber || '');
     const [isEditMode, setIsEditMode] = useState(false);
-    const [profileImage, setProfileImage] = useState('./images/defualt.png');
+  
+    const userDocRef = auth.currentUser ? doc(db, 'establishments', auth.currentUser.uid) : null;
+
+    const [imageUpload, setImageUpload] = useState(null);
+    const [imageUrls, setImageUrls] = useState([]);
+    const [currentImageUrl, setCurrentImageUrl] = useState("");
+
+    const saveProfileImageUrl = async (url) => {
+      if (userDocRef) {
+        await updateDoc(userDocRef, {
+          profileImageUrl: url,
+        });
+      }
+    };    
+   
+    const imagesListRef = ref(storage, "images/");
+    const uploadFile = async (uri) => {
+      if (uri && auth.currentUser) {
+        const imageName = `${v4()}.jpg`; // Generate a new UUID for the image
+        const imageRef = ref(storage, `images/${imageName}`);
+        const response = await fetch(uri);
+        const blob = await response.blob();
+  
+        // Start the upload process
+        await uploadBytes(imageRef, blob);
+        const url = await getDownloadURL(imageRef); // Corrected the promise handling here
+        console.log('Uploaded a blob or file!');
+        console.log('File available at', url); // Log the URL
+        setProfileImageUrl(url); // Update the state to show the new image
+        saveProfileImageUrl(url); // Save the image URL to Firestore
+      }
+    };
+    const pickImage = async () => {
+      let result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 1,
+      });
+    
+      if (!result.cancelled) {
+        setImageUpload(result.uri);
+        // Upload the file after the image is picked
+        uploadFile(result.uri);
+      }
+    };
+  
+    useEffect(() => {
+      (async () => {
+        if (Platform.OS !== 'web') {
+          const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+          if (status !== 'granted') {
+            alert('Sorry, we need camera roll permissions to make this work!');
+          }
+        }
+      })();
+    }, []);
+
+   
+
 
     const [isInfoVisible, setIsInfoVisible] = useState(false);
 
     useEffect(() => {
       const fetchUserData = async () => {
         try {
-          const user = auth.currentUser;
-          if (user) {
-            const userId = user.uid;
+          if (auth.currentUser) {
+            const userId = auth.currentUser.uid;
             const userDocRef = doc(db, 'user', userId);
-            const userDoc = await getDoc(userDocRef);
-            if (userDoc.exists()) {
-              const userData = userDoc.data();
+            const userDocSnapshot = await getDoc(userDocRef);
+  
+            if (userDocSnapshot.exists()) {
+              const userData = userDocSnapshot.data();
               setName(userData.name || "");
               setAddress(userData.address || "");
               setPhone(userData.contactNumber || "");
@@ -39,7 +102,6 @@ const Profs = ({ route }) => {
               setGender(userData.gender || "");
               setVehicle(userData.car || "");
               setPlateNumber(userData.carPlateNumber || "");
-              setProfileImage(userData.profileImageUrl || './images/defualt.png');
             } else {
               console.log("No user data found!");
             }
@@ -50,28 +112,23 @@ const Profs = ({ route }) => {
       };
   
       fetchUserData();
-    }, []); 
+    }, [user]);
 
     const updateUserData = async () => {
       try {
         if (auth.currentUser) {
           const userId = auth.currentUser.uid;
-          const userDocRef = doc(db, 'user', userId); 
-  
-          // Data to be updated or set
+          const userDocRef = doc(db, 'user', userId);
           const updatedData = {
             name: name,
             address: address,
-            contactNumber:phone,
-            email: email,
-            vehicle: vehicle,
-            carPlateNumber:plateNumber,
+            contactNumber: phone,
             age: age,
+            gender: gender,
+            car: vehicle,
+            carPlateNumber: plateNumber,
           };
-  
-          // Using set with { merge: true } will either update or create the document
           await updateDoc(userDocRef, updatedData);
-  
           console.log("User data updated/created successfully!");
         } else {
           console.error("User not authenticated");
@@ -79,64 +136,23 @@ const Profs = ({ route }) => {
       } catch (error) {
         console.error("Error updating user data: ", error);
       }
-  };
+    };
+
+    const handleSave = async () => {
+      // Log the current user (for debugging purposes)
+      console.log(auth.currentUser);
     
-    useEffect(() => {
-      // Request permission to access the device's image library
-      (async () => {
-        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-        if (status !== 'granted') {
-          alert('Permission to access media library is required!');
-        }
-      })();
-    }, []);
-
-    const handleImagePick = async () => {
-    try {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-      });
-
-      if (!result.cancelled) {
-        setProfileImage(result.uri);
-        await uploadImage(result.uri);
+      // Save the updated user data to Firestore
+      updateUserData();
+    
+      // Check if there's a new image uploaded that hasn't been saved yet
+      if (imageUpload) {
+        // Save the image URL to Firestore and wait for it to finish
+        await saveProfileImageUrl(profileImageUrl);
+        // Reset the imageUpload state to indicate the image has been saved
+        setImageUpload(null);
       }
-    } catch (error) {
-      console.error("Error picking the image: ", error.message);
-    }
-  };
-
-
-  const uploadImage = async (uri) => {
-    try {
-      const response = await fetch(uri);
-      const blob = await response.blob();
-  
-      const userId = auth.currentUser?.uid;
-      if (!userId) throw new Error("User ID not available for image upload");
-  
-      const ref = storage.ref().child(`profilePictures/${userId}`);
-      await ref.put(blob);
-      const downloadURL = await ref.getDownloadURL();
-  
-      console.log(`Successfully uploaded file and got download link - ${downloadURL}`);
-      setProfileImage(downloadURL);
-      await db.collection('user').doc(userId).update({
-        profileImageUrl: downloadURL,
-      });
-    } catch (error) {
-      console.error("Error uploading image: ", error.message);
-    }
-};
-  
-
-  const handleSave = () => {
-    console.log(auth.currentUser);
-    updateUserData();
-};
+    };
 
 const toggleEditMode = () => {
   if (isEditMode) {
@@ -144,44 +160,64 @@ const toggleEditMode = () => {
   }
   setIsEditMode(!isEditMode);
 };
+const uploadImage = async (imageUri) => {
+  // Assuming you have a function that handles the upload and returns the URL
+  const uploadUrl = await uploadFileToServer(imageUri); // Replace with your actual upload function
+
+  console.log(uploadUrl); // Log the URL to check if it's correct
+  setProfileImageUrl(uploadUrl); // Update the state with the new URL
+};
   
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Image
-          style={styles.coverPhoto}
-          source={require('./images/background.jpg')}
+    <View style={styles.header}>
+      <Image
+        style={styles.coverPhoto}
+        source={require('./images/background.jpg')}
+      />
+    </View>
+    <View style={styles.nameWithImageContainer}>
+    <TouchableOpacity onPress={pickImage}>
+<Image
+key={profileImageUrl} // This will force the Image to rerender when profileImageUrl changes
+
+style={styles.profilePicture}
+source={profileImageUrl ? { uri: `${profileImageUrl}?${new Date()}` } : require('./images/defualt.png')}
+/>
+{isEditMode && (
+  <Button title="Upload Image" onPress={pickImage}/>
+)}
+</TouchableOpacity>
+      {isEditMode ? (
+        <TextInput 
+          style={[
+            styles.profileName, 
+            styles.infoInput,
+            isEditMode && styles.editModeInput
+          ]}
+          value={name}
+          onChangeText={(text) => setName(text)}
+          placeholder="Name"
         />
-        <TouchableOpacity activeOpacity={isEditMode ? 0.7 : 1} onPress={isEditMode ? handleImagePick : null}>
-        <Image style={styles.profilePicture} source={profileImage ? {uri: profileImage} : require('./images/defualt.png')} />
-            </TouchableOpacity>
-       
-      </View>
-        {isEditMode ? 
-            <TextInput 
-                style={[styles.profileName, styles.infoInput]} 
-                value={name} 
-                onChangeText={(text) => setName(text)}
-                placeholder="Name"
-            /> :
-            <Text style={styles.profileName}>{name}</Text>
-        }
-      <TouchableOpacity style={styles.editProfileButton} onPress={toggleEditMode}>
-                <Text style={styles.editProfileText}>{isEditMode ? "Save" : "Edit Profile"}</Text>
-                  </TouchableOpacity>
+      ) : (
+        <Text style={styles.profileName}>{name}</Text>
+      )}
+    </View>
+    <TouchableOpacity style={styles.editProfileButton} onPress={toggleEditMode}>
+      <Text style={styles.editProfileText}>{isEditMode ? "Save" : "Edit Profile"}</Text>
+    </TouchableOpacity>
                   <View style={styles.infoSection}>
         <TouchableOpacity onPress={() => setIsInfoVisible(!isInfoVisible)}>
-        <Text style={{ fontWeight: 'bold', marginTop: 20, textAlign: 'center'  }}>View User Information</Text>
+        <Text style={{ fontWeight: 'bold', marginTop: 25, left: 10, fontSize:18 }}>User Information</Text>
         </TouchableOpacity>
 
-        {isInfoVisible && (
-          <>
+      
             <View style={styles.othersContainer}>
               <Image style={styles.others} source={require('./images/address.png')} />
               {isEditMode ? 
                   <TextInput 
-                      style={styles.infoInput} 
+                      style={[styles.infoLabel, isEditMode && styles.editModeInput]} 
                       value={address} 
                       onChangeText={(text) => setAddress(text)}
                       placeholder="Address"
@@ -194,7 +230,7 @@ const toggleEditMode = () => {
               <Image style={styles.others} source={require('./images/contact.png')} />
               {isEditMode ? 
                   <TextInput 
-                      style={styles.infoInput} 
+                  style={[styles.infoLabel, isEditMode && styles.editModeInput]} 
                       value={phone} 
                       onChangeText={(text) => setPhone(text)}
                       placeholder="Contact Number"
@@ -207,7 +243,7 @@ const toggleEditMode = () => {
               <Image style={styles.others} source={require('./images/age.png')} />
               {isEditMode ? 
                   <TextInput 
-                      style={styles.infoInput} 
+                  style={[styles.infoLabel, isEditMode && styles.editModeInput]} 
                       value={age} 
                       onChangeText={(text) => setAge(text)}
                       placeholder="Age"
@@ -220,7 +256,7 @@ const toggleEditMode = () => {
               <Image style={styles.others} source={require('./images/gender.png')} />
               {isEditMode ? 
                   <TextInput 
-                      style={styles.infoInput} 
+                  style={[styles.infoLabel, isEditMode && styles.editModeInput]} 
                       value={gender} 
                       onChangeText={(text) => setGender(text)}
                       placeholder="Gender"
@@ -233,7 +269,7 @@ const toggleEditMode = () => {
               <Image style={styles.others} source={require('./images/vehicle.png')} />
               {isEditMode ? 
                   <TextInput 
-                      style={styles.infoInput} 
+                  style={[styles.infoLabel, isEditMode && styles.editModeInput]} 
                       value={vehicle} 
                       onChangeText={(text) => setVehicle(text)}
                       placeholder="Vehicle"
@@ -246,7 +282,7 @@ const toggleEditMode = () => {
               <Image style={styles.others} source={require('./images/plate.png')} />
               {isEditMode ? 
                   <TextInput 
-                      style={styles.infoInput} 
+                  style={[styles.infoLabel, isEditMode && styles.editModeInput]} 
                       value={plateNumber} 
                       onChangeText={(text) => setPlateNumber(text)}
                       placeholder="Plate Number"
@@ -254,10 +290,7 @@ const toggleEditMode = () => {
                   <Text style={styles.info}>{plateNumber}</Text>
               }
             </View>
-          </>
-        )}
-      </View>
-        
+      </View>  
     </ScrollView>
   );
 }
@@ -275,21 +308,25 @@ const styles = StyleSheet.create({
     height: 220,
   },
   profilePicture: {
-    width: 130,
-    height: 130,
+    width: 100,
+    height: 100,
     borderRadius: 70,
     borderColor: '#fff',
     borderWidth: 3,
     position: 'absolute',
-    bottom: 50,
-    alignSelf: 'center'
+    bottom: 10,
   },
   profileName: {
-    marginTop: 30,
-    alignSelf:'center',
+    alignSelf: 'center',
     fontSize: 22,
     fontWeight: 'bold',
+    marginLeft: 100
+    // any other styles you need
   },
+  editModeInput: {
+    borderBottomWidth: 2, 
+    borderColor: 'red',
+},
   editProfileButton: {
     marginTop: 20,
     marginHorizontal: 20,
@@ -310,8 +347,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   infoLabel: {
-    fontSize: 14,
-    color: '#666',
+    fontSize: 18,
+    color: 'black',
     marginTop: 10,
   },
   info: {
@@ -327,6 +364,16 @@ others: {
     width: 30,
     height: 30, 
     marginRight: 10,
+},
+nameWithImageContainer: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  marginTop: 30,
+  marginLeft: 30, // adjust this as needed to align with other elements on the page
+},
+sideImage: {
+  width: 50,
+  height: 50,
 },
 });
 
