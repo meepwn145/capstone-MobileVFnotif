@@ -15,10 +15,11 @@ export default function Dashboard() {
   
   const [isSidebarVisible, setSidebarVisible] = useState(false);
   const carouselImages = [
-    require('./images/parking1.jpg'),
     require('./images/parking2.jpg'),
     require('./images/parking3.png'),
     require('./images/parking4.jpg'),
+    require('./images/parking7.jpg'),
+    require('./images/parking5.png'),
   ];
 
   const handleCardClick = (screenName) => {
@@ -42,7 +43,7 @@ export default function Dashboard() {
           animated: true,
         });
       }
-    }, 3000);
+    }, 1000);
 
     return () => clearInterval(scrollInterval.current);
   }, []);
@@ -61,8 +62,7 @@ export default function Dashboard() {
 
   return (
     <View style={styles.container}>
-      <Image source={require('./images/Parking.png')} style={styles.navbar} />
-
+      <Image style={styles.navbar} />
       <View style={styles.logoContainer}>
         <Text style={styles.logoText}>Explore more available Parking Lots</Text>
         <Text style={styles.logoSubText}>Find and Reserve Parking Spaces</Text>
@@ -185,19 +185,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'black',
+    
   },
   navbar: {
     width: '100%',
-    height: '30%',
-    resizeMode: 'stretch',
-    marginBottom: 20,
+    height: '20%',
+    resizeMode: 'contain',
+    marginBottom: 15,
+    marginTop: 40, // Adjust the marginTop value to move the image lower
+
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
-    paddingBottom: 20,
+    paddingBottom: 35,
     borderTopWidth: 1,
     borderColor: '#ccc',
     position: 'absolute',
@@ -207,14 +210,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
   },
   footerButton: {
-    marginTop: 10,
+    marginTop: 45,
     flex: 1,
-    aspectRatio: 8 / 7,
-    marginHorizontal: 5,
+    aspectRatio: 10 / 8,
+    marginHorizontal: 14,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 3,
-    borderRadius: 10,
+    borderRadius: 45,
   },
   cardText: {
     color: '#000',
@@ -231,7 +234,7 @@ const styles = StyleSheet.create({
     width: '80%',
     backgroundColor: 'white',
     padding: 25,
-    borderRadius: 15,
+    borderRadius: 10,
   },
   sidebarButton: {
     paddingVertical: 10,
@@ -243,8 +246,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sidebarButtonText: {
-    fontSize: 15,
-    marginLeft: 25,
+    fontSize: 10,
+    marginLeft: 20,
   },
   logo: {
     width: 35,
@@ -252,11 +255,11 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   carouselContainer: {
-    height: 300,
+    height: 200,
   },
   carouselImage: {
-    width: 300, 
-    height: 300,
+    width: 359.5, 
+    height: 200,
     resizeMode: 'cover',
   },
   logoContainer: {
