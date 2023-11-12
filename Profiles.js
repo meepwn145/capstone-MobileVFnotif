@@ -1,9 +1,11 @@
 import React, {useState, useEffect, useContext} from 'react';
-import { StyleSheet, View, Text, Image, ScrollView, TouchableOpacity,TextInput } from 'react-native';
+import { StyleSheet, View, Text, Image, ScrollView, TouchableOpacity,TextInput, Alert } from 'react-native';
 import { db, storage, auth} from "./config/firebase";
 import { updateDoc, doc,getDoc, getDocs, query, where, collection } from 'firebase/firestore';
 import UserContext from './UserContext';
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import * as ImagePicker from 'expo-image-picker';
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 const Profs = () => {
 
@@ -19,7 +21,10 @@ const Profs = () => {
     const [plateNumber, setPlateNumber] = useState(user?.carPlateNumber || '');
     const [editingField, setEditingField] = useState(null);
     const [managementNames, setManagementNames] = useState([]);
+    const [image, setImage] = useState(null)
+   const [uploading, setUploading] = useState(false) 
 
+    
 
     useEffect(() => {
       const fetchUserData = async () => {
@@ -147,16 +152,102 @@ const Profs = () => {
       };
     }, [user?.email]);
     
+    useEffect(() => {
+      (async () => {
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        if (status !== 'granted') {
+          alert('Sorry, we need camera roll permissions to make this work!');
+        }
+      })();
+    }, []);
+    
+    const uploadImage = async () => {
+      try {
+        if (!image || !image.uri) {
+          throw new Error("Image URI is undefined");
+        }
+    
+        const response = await fetch(image.uri);
+    
+        if (!response.ok) {
+          throw new Error(`Failed to fetch image: ${response.status}`);
+        }
+    
+        const blob = await response.blob();
+        const filename = image.uri.substring(image.uri.lastIndexOf('/') + 1);
+        const storageRef = ref(storage, `profilePictures/${filename}`);
+        await uploadBytes(storageRef, blob);
+    
+        // Retrieve the download URL
+        const downloadURL = await getDownloadURL(storageRef);
+        setProfileImageUrl(downloadURL); // Update the state with the new URL
+
+        if (auth.currentUser) {
+          const userId = auth.currentUser.uid;
+          const userDocRef = doc(db, 'user', userId);
+          await updateDoc(userDocRef, { profileImageUrl: downloadURL });
+        }
+    
+        setUploading(false);
+        Alert.alert('Photo uploaded!');
+        setImage(null);
+      } catch (error) {
+        console.error(error);
+        setUploading(false);
+      }
+    };
+    
+    useEffect(() => {
+      const fetchProfileImage = async () => {
+        if (auth.currentUser) {
+          const userId = auth.currentUser.uid;
+          const userDocRef = doc(db, 'user', userId);
+          const userDocSnapshot = await getDoc(userDocRef);
+    
+          if (userDocSnapshot.exists()) {
+            const userData = userDocSnapshot.data();
+            if (userData.profileImageUrl) {
+              setProfileImageUrl(userData.profileImageUrl);
+            }
+          } else {
+            console.log("No user profile found!");
+          }
+        }
+      };
+    
+      fetchProfileImage();
+    }, []);
+    
+
+    const pickImage = async () => {
+      let result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.All,
+          allowsEditing: true,
+          aspect: [4,3],
+          quality: 1
+      });
+      const source = {uri: result.assets[0].uri}
+      console.log(source)
+      setImage(source)
+  }; 
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Image
-          source={require('./images/gilbert.jpg')} // Replace with your local image
-          style={styles.profileImage}
-        />
+      {profileImageUrl && (
+    <Image source={{ uri: profileImageUrl }} style={styles.profileImage} />
+  )}
+  {image && <Image source={{ uri: image.uri }} style={{ width: 300, height: 300 }} />}
         <Text style={styles.name}>{name}</Text>
         <Text style={styles.occupation}>{email}</Text>
+        <View style={styles.buttonContainer}>
+  <TouchableOpacity onPress={pickImage} style={styles.uploadButton}>
+          <Text style={styles.uploadButtonText} >Pick Image</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={uploadImage} style={styles.uploadButton2}>
+          <Text style={styles.uploadButtonText} >Upload Image</Text>
+        </TouchableOpacity>
+        </View>
       </View>
 
       <View style={styles.section}>
@@ -329,16 +420,32 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: '#CDCDCD', // Make sure this color contrasts with the section background color
-    marginTop: 16, // You can adjust this value as needed
-    marginBottom: 16, // You can adjust this value as needed
+    backgroundColor: '#CDCDCD',
+    marginTop: 16, 
+    marginBottom: 16, 
   },
   editableText: {
-    backgroundColor: '#e8f0fe', // Light blue background
-    borderColor: '#4a90e2', // Blue border
+    backgroundColor: '#e8f0fe', 
+    borderColor: '#4a90e2', 
     borderWidth: 1,
     borderRadius: 4,
     padding: 5,
+  },
+  uploadButton: {
+    marginTop: 10,
+    backgroundColor: '#20B2AA',
+    padding: 10,
+    borderRadius: 5,
+  },
+  uploadButton2: {
+    marginTop: 10,
+    backgroundColor: '#89CFF0',
+    padding: 10,
+    borderRadius: 5,
+  },
+  buttonContainer: {
+    flexDirection: 'row', 
+    marginTop: 10,
   },
 });
 
