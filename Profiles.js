@@ -70,7 +70,6 @@ const Profs = () => {
           const updatedData = {
             name: name,
             address: address,
-            email: email,
             contactNumber: phone,
             age: age,
             gender: gender,
@@ -255,6 +254,8 @@ const Profs = () => {
         <Text style={styles.subHeader}>Basic Information</Text>
           <View style={styles.itemContainer}>
             <View style={styles.itemTextContainer}>
+            <Text style={styles.itemTitle}>Name</Text>
+            {renderEditableView('name', name, setName)}
             <Text style={styles.itemTitle}>Address</Text>
             {renderEditableView('address', address, setAddress)}
             <Text style={styles.itemTitle}>Age</Text>
@@ -273,7 +274,7 @@ const Profs = () => {
               <Text style={styles.itemTitle}>Phone Number</Text>
               {renderEditableView('phoneNumber', phone, setPhone)}
               <Text style={styles.itemTitle}>Email</Text>
-              {renderEditableView('email', email, setEmail)}
+              <Text style={styles.itemSubtitle}>{email}</Text>
             </View>
             <TouchableOpacity onPress={() => { /* handle edit */ }}>
               <Text style={styles.editText}>Edit</Text>
