@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, TextInput } from 'react-native';
+import {View, Text, TextInput, StyleSheet, TouchableOpacity, Image, SafeAreaView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from './config/firebase';
@@ -10,6 +10,7 @@ export function LoginScreen() {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
 
   const handleGoToDashboard = (user) => {
     navigation.navigate('Profiles', { user });
@@ -51,119 +52,189 @@ export function LoginScreen() {
   
     }
   };
+
+  const handleGoToSignIn = () => {
+    navigation.navigate('SignUp');
+  };
   
-  
+  const handleRememberMe = () => {
+    setRememberMe(!rememberMe);
+  };
   
   
 
   return (
-    <View style={styles.container}>
+    <SafeAreaView style={styles.container}>
       <Image
-        source={{
-          uri: 'https://scontent.fceb2-1.fna.fbcdn.net/v/t1.15752-9/364409165_298245242765459_1939857550581027986_n.png?_nc_cat=106&ccb=1-7&_nc_sid=ae9488&_nc_eui2=AeGH8ceYN0OHIYcmDG7ZPRrgbO7D2w_v0Fds7sPbD-_QV4P_uFjgu3QI2_YGKamA-1PwUOPMWVoEcFSM2q3jFaWo&_nc_ohc=yzRgVQ2QvdUAX90hfND&_nc_ht=scontent.fceb2-1.fna&oh=03_AdSsZ8kD8a0pAH3cUE5zmTWuBKi3fAOrdz-39PExaEWJQg&oe=64EEF0DB',
-        }}
-        style={styles.image}
-      />
-      <Text style={styles.title}>Log In</Text>
+           source={require('./images/login-background.jpg')}
+           style={styles.backgroundImage}
+           />
+    <View style={styles.formContainer}>
       <TextInput
-        style={styles.input}
-        placeholder="Email"
         value={email}
         onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
+        placeholder="Email address"
+        style={styles.input}
       />
       <TextInput
-        style={styles.input}
-        placeholder="Password"
         value={password}
         onChangeText={setPassword}
+        placeholder="Password"
         secureTextEntry
+        style={styles.input}
       />
-      <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Login</Text>
+      <View style={styles.rememberMeContainer}>
+        <TouchableOpacity onPress={handleRememberMe} style={styles.checkbox}>
+          {rememberMe && <View style={styles.checkboxInner} />}
+        </TouchableOpacity>
+        <Text style={styles.rememberMeText}>Remember me</Text>
+        <TouchableOpacity onPress={handleForgotPassword}>
+          <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+        </TouchableOpacity>
+      </View>
+      <TouchableOpacity style={styles.button2} onPress={handleLogin}>
+        <Text style={styles.buttonText}>Sign In</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.forgotButton} onPress={handleForgotPassword}>
-        <Text style={styles.forgotButtonText}>Forgot Password</Text>
+      <TouchableOpacity style={styles.button} onPress={handleGoToSignIn}>
+      <Text style={styles.buttonText}>Create Account</Text>
+      </TouchableOpacity>
+      <View style={styles.separator}>
+          <View style={styles.line} />
+          <Text style={styles.orText}>OR</Text>
+          <View style={styles.line} />
+        </View>
+      <TouchableOpacity style={[styles.socialButton, { backgroundColor: '#3b5998' }]}>
+        <Text style={styles.socialButtonText}>
+        <Image
+       source={require('./images/facebook.png')}
+        style={styles.logo}
+        />
+          Continue with Facebook</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={[styles.socialButton,{ backgroundColor: '#1DA1F2' }]}>
+        <Text style={styles.socialButtonText}>
+        <Image
+           source={require('./images/google.png')}
+           style={styles.logo2}
+           />
+          Continue with Google</Text>
       </TouchableOpacity>
     </View>
-  );
+  </SafeAreaView>
+);
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'black',
+    backgroundColor: '#fff',
   },
-  image: {
-    width: 200,
-    height: 200,
-    resizeMode: 'contain',
-    marginBottom: 20,
-  },
-  startText: {
-    color: 'white',
-    fontSize: 15,
-    marginTop: 40,
-    fontFamily: 'Courier New',
-    textAlign: 'center',
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '75%',
-    marginTop: 10,
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 20,
-    color: 'white',
-    fontFamily: 'Courier New',
+  formContainer: {
+    padding: 20,
+    marginTop: 100,
   },
   input: {
-    width: '80%',
-    height: 40,
-    borderWidth: 1,
-    borderColor: '#ccc',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 5,
+    padding: 15,
+    marginBottom: 15,
+    fontSize: 16,
     borderRadius: 20,
-    marginBottom: 10,
-    paddingHorizontal: 10,
-    fontFamily: 'Courier New',
-    backgroundColor: '#FFFFFF',
+    borderWidth: 1, 
+    borderColor: '#c0c0c0', 
+  },
+  rememberMeContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 50,
+  },
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderWidth: 1,
+    borderColor: '#c0c0c0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  checkboxInner: {
+    width: 12,
+    height: 12,
+    backgroundColor: '#3b89ac',
+  },
+  rememberMeText: {
+    flex: 1,
+    fontSize: 16,
+    color: '#fff'
+  },
+  forgotPasswordText: {
+    fontSize: 16,
+    color: '#3b89ac',
   },
   button: {
-    marginTop: 20,
-    paddingVertical: 10,
-    paddingHorizontal: 20,
     backgroundColor: '#3b89ac',
+    paddingVertical: 15,
     borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  button2: {
+    backgroundColor: 'green',
+    paddingVertical: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  separator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  line: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'black',
+  },
+  orText: {
+    marginHorizontal: 10,
+    color: 'black',
+    marginBottom: 20,
+    fontWeight: 'bold'
+  },
+  socialButton: {
+    paddingVertical: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginBottom: 10,
     marginTop: 10,
   },
-  forgotButton: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    marginTop: 10,
+  socialButtonText: {
+    color: '#fff',
+    fontSize: 16,
   },
   logo: {
     width: 15,
     height: 15,
     marginRight: 10,
     resizeMode: 'contain',
-    alignItems: 'left',
+    alignItems:'left',
   },
-  buttonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontFamily: 'Courier New',
-    textAlign: 'center',
+  logo2: {
+    width: 15,
+    height: 15,
+    marginRight: 10,
+    resizeMode: 'contain',
+    alignItems:'left',
   },
-  forgotButtonText: {
-    color: '#3b89ac',
-    fontSize: 16,
-    fontFamily: 'Courier New',
-    textAlign: 'center',
+  backgroundImage: {
+    ...StyleSheet.absoluteFillObject, // Makes the background fill the entire screen
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover' // Ensures that the background image covers the entire screen
   },
 });
 

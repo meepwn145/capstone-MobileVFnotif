@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ImageBackground } from 'react-native';
 
 export function Start({ navigation }) {
   const handleGoToDashboard = () => {
@@ -8,14 +8,18 @@ export function Start({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <Image
-       source={require('./images/Start.png')}
-        style={styles.image}
-      />
-      <Text style={styles.startText}>Find a suitable parking area near your location</Text>
-      <TouchableOpacity style={styles.button} onPress={handleGoToDashboard}>
-        <Text style={styles.buttonText}>Get Started</Text>
-      </TouchableOpacity>
+      <ImageBackground
+        source={require('./images/busy.jpg')}
+        style={styles.backgroundImage}
+      >
+        <View style={styles.overlay}>
+          
+          <Text style={styles.startText}>Find a suitable parking area near your location</Text>
+          <TouchableOpacity style={styles.button} onPress={handleGoToDashboard}>
+            <Text style={styles.buttonText}>Get Started</Text>
+          </TouchableOpacity>
+        </View>
+      </ImageBackground>
     </View>
   );
 }
@@ -24,20 +28,30 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: 'black',
+  },
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover',
+    justifyContent: 'center',
+  },
+  overlay: {
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   image: {
-    width: 400,
-    height: 400,
+    width: 250,
+    height: 250,
     resizeMode: 'contain',
     marginBottom: 20,
   },
   startText: {
     color: '#E9DBBD',
-    fontSize: 15,
-    marginTop: 40,
-    fontFamily:'Courier New',
-    textAlign:'center'
+    fontSize: 20, 
+    marginTop: 20,
+    fontFamily: 'Courier New',
+    textAlign: 'center',
   },
   button: {
     marginTop: 20,
@@ -45,13 +59,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: '#A08C5B',
     borderRadius: 5,
-    marginTop: 40
+    marginTop: 40,
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
-    fontFamily:'Courier New',
-    textAlign:'center',
+    fontFamily: 'Courier New',
+    textAlign: 'center',
   },
 });
 
