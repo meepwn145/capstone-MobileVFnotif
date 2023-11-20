@@ -88,32 +88,32 @@ export default function Dashboard() {
 
       <View style={styles.footer}>
         <TouchableOpacity
-          style={[styles.footerButton, { backgroundColor: 'white' }]}
+          style={[styles.footerButton, { backgroundColor: '#A08C5B' }]}
           onPress={goToProfile}
         >
-          <AntDesign name="user" size={20} color="#002535" />
+          <AntDesign name="user" size={20} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.footerButton, { backgroundColor: 'white' }]}
+          style={[styles.footerButton, { backgroundColor: '#A08C5B' }]}
           onPress={() => handleCardClick('Search')}
         >
-          <AntDesign name="earth" size={20} color="#002535" />
+          <AntDesign name="earth" size={20} color="#fff" />
         </TouchableOpacity>
 
       
 
         <TouchableOpacity
-          style={[styles.footerButton, { backgroundColor: 'white' }]}
+          style={[styles.footerButton, { backgroundColor: '#A08C5B' }]}
           onPress={() => handleCardClick('Notifications')}
         >
-          <AntDesign name="bells" size={20} color="#002535" />
+          <AntDesign name="bells" size={20} color="#fff" />
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.footerButton, { backgroundColor: 'white' }]}
+          style={[styles.footerButton, { backgroundColor: '#A08C5B' }]}
           onPress={handleBarsClick}
         >
-          <AntDesign name="bars" size={20} color="#002535" />
+          <AntDesign name="bars" size={20} color="#fff" />
         </TouchableOpacity>
       </View>
 
