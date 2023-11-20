@@ -37,6 +37,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 15,
     color: 'black', // You can change the color to match your design
+    fontFamily: 'Courier New',
   },
   backgroundImage: {
     ...StyleSheet.absoluteFillObject, // Makes the background fill the entire screen

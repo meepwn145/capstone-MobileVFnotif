@@ -66,14 +66,14 @@ export function LoginScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <Image
-           source={require('./images/login-background.jpg')}
+           source={require('./images/login2-background.jpg')}
            style={styles.backgroundImage}
            />
     <View style={styles.formContainer}>
       <TextInput
         value={email}
         onChangeText={setEmail}
-        placeholder="Email address"
+        placeholder="Email"
         style={styles.input}
       />
       <TextInput
@@ -132,6 +132,7 @@ const styles = StyleSheet.create({
   formContainer: {
     padding: 20,
     marginTop: 100,
+    fontFamily: 'Courier New',
   },
   input: {
     backgroundColor: '#f0f0f0',
@@ -142,6 +143,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     borderWidth: 1, 
     borderColor: '#c0c0c0', 
+    fontFamily: 'Courier New',
   },
   rememberMeContainer: {
     flexDirection: 'row',
@@ -165,11 +167,14 @@ const styles = StyleSheet.create({
   rememberMeText: {
     flex: 1,
     fontSize: 16,
-    color: '#fff'
+    color: '#fff',
+    fontFamily: 'Courier New',
   },
   forgotPasswordText: {
     fontSize: 16,
-    color: '#3b89ac',
+    color: '#96DED1',
+    fontFamily: 'Courier New',
+    
   },
   button: {
     backgroundColor: '#3b89ac',
@@ -188,6 +193,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 16,
+    fontFamily: 'Courier New',
   },
   separator: {
     flexDirection: 'row',
@@ -197,13 +203,12 @@ const styles = StyleSheet.create({
   line: {
     flex: 1,
     height: 1,
-    backgroundColor: 'black',
+    backgroundColor: '#fff',
   },
   orText: {
     marginHorizontal: 10,
-    color: 'black',
+    color: '#fff',
     marginBottom: 20,
-    fontWeight: 'bold'
   },
   socialButton: {
     paddingVertical: 15,
@@ -215,6 +220,7 @@ const styles = StyleSheet.create({
   socialButtonText: {
     color: '#fff',
     fontSize: 16,
+    fontFamily: 'Courier New',
   },
   logo: {
     width: 15,

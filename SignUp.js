@@ -49,6 +49,7 @@ export function SignupScreen() {
 
 
   return (
+    
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>Create Account</Text>
       <TextInput
@@ -95,14 +96,14 @@ export function SignupScreen() {
      <View style={styles.genderContainer}>
         <Text style={styles.label}>Gender:</Text>
         <TouchableOpacity
-          style={[styles.genderOption, gender === 'male' && styles.selectedGender]}
-          onPress={() => setGender('male')}
+          style={[styles.genderOption, gender === 'Male' && styles.selectedGender]}
+          onPress={() => setGender('Male')}
         >
           <Text style={styles.genderText}>Male</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.genderOption, gender === 'female' && styles.selectedGender]}
-          onPress={() => setGender('female')}
+          style={[styles.genderOption, gender === 'Female' && styles.selectedGender]}
+          onPress={() => setGender('Female')}
         >
           <Text style={styles.genderText}>Female</Text>
         </TouchableOpacity>
@@ -129,69 +130,75 @@ export function SignupScreen() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'black',
+    justifyContent: 'flex-start', // Align content to start from the top
+    alignItems: 'stretch', // Stretch child components to match the width
+    backgroundColor: '#f0f0f0', // Light background for a modern look
     padding: 20,
-  },
-  image: {
-    width: 100,
-    height: 100,
-    resizeMode: 'contain',
-    marginBottom: 20,
+    borderRadius: 20,
+    
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    fontWeight: '800',
+    color: '#333', // Darker font for better readability
+    alignSelf: 'center', // Center the title
+    marginVertical: 30, // Add vertical margin
   },
   input: {
-    width: '100%',
-    height: 40,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 20,
-    marginBottom: 10,
+    height: 50,
+    borderWidth: 0,
+    borderBottomWidth: 2, // Underline style input
+    borderBottomColor: '#3b89ac',
+    marginBottom: 15,
     paddingHorizontal: 10,
-    backgroundColor:'#FFFFFF',
-    fontFamily:'Courier New'
+    backgroundColor: '#fff', // White background for input
+    fontSize: 16, // Larger font size
+    borderRadius: 20,
   },
   button: {
-    backgroundColor: '#3b89ac',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-    marginTop:20,
+    backgroundColor: 'black', // A vibrant button color
+    paddingVertical: 12,
+    borderRadius: 15, // Rounded corners for buttons
+    marginTop: 20,
+    shadowOpacity: 0.3, // Slight shadow for depth
+    shadowRadius: 3,
+    shadowOffset: { height: 3, width: 0 },
+    elevation: 3, // Elevation for Android
   },
   buttonText: {
+    textAlign: 'center', // Center text in button
     color: '#fff',
-    fontSize: 18,
-    fontFamily:'Courier New'
+    fontSize: 20,
+    fontWeight: '500',
   },
   genderContainer: {
     flexDirection: 'row',
+    justifyContent: 'center', // Center gender options
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 20,
   },
   label: {
-    marginRight: 10,
-    fontSize: 16,
-    color: 'white',
+    fontSize: 18,
+    color: '#333', // Dark label for readability
+    marginBottom: 5, // Space between label and options
   },
   genderOption: {
-    borderWidth: 1,
-    borderColor: '#ccc',
+    borderWidth: 0,
+    borderBottomWidth: 2,
+    borderBottomColor: '#ccc',
     paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 5,
-    marginRight: 10,
+    paddingHorizontal: 15,
+    marginHorizontal: 5, // Add horizontal margin between buttons
+    borderRadius: 25,
   },
   selectedGender: {
-    borderColor: '#3b89ac',
-    backgroundColor: '#3b89ac',
+    borderBottomColor: '#4169E1', // Highlight color for selected gender
+    backgroundColor: '#96DED1', // Light background for selected gender option
   },
   genderText: {
-    color: 'white',
+    color: '#333',
+    fontSize: 16,
+    fontFamily: 'Courier New'
   },
 });
 export default SignupScreen;
