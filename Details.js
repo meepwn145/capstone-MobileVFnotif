@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput} from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import style from 'react-native-modal-picker/style';
 
 export default function DetailsScreen({ route }) {
   const { item } = route.params;
@@ -11,12 +12,17 @@ export default function DetailsScreen({ route }) {
         <Text style={styles.navbarTitle}>Parking Information</Text>
       </View>
       <View style={styles.containerUnderNavbar}>
-      <Text style={styles.para}>{item.name}</Text>
+      <Text style={styles.para}>{item.managementName}</Text>
         <Image source={{ uri: item.imageUrl }} style={styles.image} />
         <Text style= {styles.para}>Located at</Text>
         <Text style={styles.address}>{item.companyAddress}</Text>
-        <Text style={styles.para2}>Available Parking Space: {item.numberOfParkingLots}</Text>
+        <Text style={styles.para2}>Available Parking Space: {item.totalSlots}</Text>
       </View>
+
+      <TouchableOpacity onPress={() => navigation.navigate('reservation', { item: item })} style={styles.buttonReserve}>
+  <Text style={styles.buttonText}>Reserve</Text>
+</TouchableOpacity>
+
       <TouchableOpacity onPress={() => navigation.navigate('Map')} style={styles.button}>
         <Text style={styles.buttonText}>Direction</Text>
       </TouchableOpacity>
@@ -75,7 +81,25 @@ const styles = StyleSheet.create({
     width: '100%', 
     marginLeft: 20,
   },
+  buttonReserve: {
+    backgroundColor: 'black',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 20,
+    marginBottom: 100, 
+    position: 'absolute', 
+    bottom: 0, 
+    width: '100%', 
+    marginLeft: 20,
+  },
   buttonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  buttonText1: {
     color: 'white',
     fontSize: 16,
     fontWeight: 'bold',
