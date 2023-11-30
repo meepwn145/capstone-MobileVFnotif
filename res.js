@@ -44,12 +44,19 @@ export default function ReservationScreen({ route }) { // 'item' prop is used he
         }
     }, [user]);
 
+    
     useEffect(() => {
-      if (!user) {
-        console.log("Waiting for user data to load or user is not logged in");
-      } else {
-        // Fetch and listen to changes in slot data
-        const unsubscribe = onSnapshot(
+      let unsubscribeFromEstablishments;
+      let unsubscribeFromLogs;
+    
+      const fetchSlotsAndOccupancy = async () => {
+        if (!user) {
+          console.log("Waiting for user data to load or user is not logged in");
+          return;
+        }
+    
+        // Fetch and listen to changes in slot data from the establishments collection
+        unsubscribeFromEstablishments = onSnapshot(
           query(collection(db, 'establishments'), where('managementName', '==', item.managementName)),
           (snapshot) => {
             if (!snapshot.empty) {
@@ -61,12 +68,38 @@ export default function ReservationScreen({ route }) { // 'item' prop is used he
             }
           },
           (error) => {
-            console.error('Error fetching real-time data:', error);
+            console.error('Error fetching establishment data:', error);
           }
         );
     
-        return () => unsubscribe(); // Cleanup on unmount
-      }
+        // Listen for real-time updates on occupied slots from the logs collection
+        unsubscribeFromLogs = onSnapshot(
+          query(collection(db, 'logs'), where('managementName', '==', item.managementName)),
+          (snapshot) => {
+            const occupiedSlots = snapshot.docs.map(doc => doc.data().slotId);
+    
+            setSlotSets(currentSlotSets => {
+              return currentSlotSets.map(floor => ({
+                ...floor,
+                slots: floor.slots.map(slot => ({
+                  ...slot,
+                  occupied: occupiedSlots.includes(slot.id)
+                }))
+              }));
+            });
+          },
+          (error) => {
+            console.error('Error fetching logs data:', error);
+          }
+        );
+      };
+    
+      fetchSlotsAndOccupancy();
+    
+      return () => {
+        unsubscribeFromEstablishments && unsubscribeFromEstablishments();
+        unsubscribeFromLogs && unsubscribeFromLogs();
+      };
     }, [user, item.managementName]);
   
     const processEstablishmentData = (establishmentData) => {
@@ -103,6 +136,7 @@ export default function ReservationScreen({ route }) { // 'item' prop is used he
       return newSlotSets;
     };
 
+    
    
 
   

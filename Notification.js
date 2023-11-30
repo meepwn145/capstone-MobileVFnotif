@@ -11,6 +11,7 @@ export default function Notifications() {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
   const [parkingLogs, setParkingLogs] = useState([]);
+  const [reserveLogs, setReserveLogs] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
   const toggleSelection = (id) => {
     setSelectedId(selectedId === id ? null : id); // Toggle selection
@@ -39,6 +40,43 @@ export default function Notifications() {
             setParkingLogs(logs);
           } else {
             setParkingLogs([]);
+          }
+          setLoading(false);
+        }, (err) => {
+          console.error(`Encountered error: ${err}`);
+          setLoading(false);
+        });
+  
+        return () => unsubscribeLogs();
+      } else {
+        setLoading(false);
+      }
+    });
+  
+    return () => unsubscribeAuth();
+  }, []);
+
+  useEffect(() => {
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        const userID = user.email;
+        // Construct the query for all parking logs for the user
+        const q = query(collection(db, 'reservations'), where('email', '==', userID), orderBy('timestamp', 'desc'));
+  
+        const unsubscribeLogs = onSnapshot(q, (snapshot) => {
+          if (!snapshot.empty) {
+            const logs = snapshot.docs.map(doc => {
+              const data = doc.data();
+              return {
+                id: doc.id,
+                managementName: data.managementName, 
+                timestamp: data.timestamp, 
+                slotId: data.slotId,
+              };
+            });
+            setReserveLogs(logs);
+          } else {
+            setReserveLogs([]);
           }
           setLoading(false);
         }, (err) => {
@@ -85,10 +123,20 @@ export default function Notifications() {
     }
   };
 
+  const deleteNotification2 = async (id) => {
+    try {
+      // Delete the notification from the database
+      await deleteDoc(doc(db, 'reservations', id));
+      console.log('Notification deleted successfully');
+    } catch (error) {
+      console.error('Error deleting notification:', error);
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.navbar}>
-        <Text style={styles.navbarTitle}>Parking History</Text>
+        <Text style={styles.navbarTitle}>Parking Notification</Text>
       </View>
       <View style={styles.content}>
         {parkingLogs.length > 0 ? (
@@ -126,7 +174,42 @@ export default function Notifications() {
             </TouchableOpacity>
           ))
         ) : (
-          <Text style={styles.notificationText}>You have no new Notifications</Text>
+          <Text style={styles.notificationText}>No new parking notification</Text>
+        )}
+      </View>
+
+      <View style={styles.content}>
+        {reserveLogs.length > 0 ? (
+          reserveLogs.map((log) => (
+            <TouchableOpacity
+              key={log.id}
+              style={styles.notification}
+              onPress={() => toggleSelection(log.id)}
+            >
+              <Text style={styles.notificationText}>
+              Reserved at: {log.managementName}
+              </Text>
+              <Text style={styles.notificationText}>
+                Slot Number: {log.slotId}
+              </Text>
+              <Text style={styles.notificationDate}>
+                Date: {new Date(log.timestamp.seconds * 1000).toLocaleDateString()} 
+              </Text>
+              {selectedId === log.id && (
+                <TouchableOpacity
+                  onPress={() => deleteNotification2(log.id)}
+                  style={styles.deleteButton}
+                >
+                    <Image 
+                      source={require('./images/del.png')}
+                      style={styles.deleteButtonImage}
+                    />
+                </TouchableOpacity>
+              )}
+            </TouchableOpacity>
+          ))
+        ) : (
+          <Text style={styles.notificationText}>No new reservation notification</Text>
         )}
       </View>
       
