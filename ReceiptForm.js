@@ -17,7 +17,7 @@ export default function ReceiptScreen({ route }) {
     <View style={styles.container}>
       <Text style={styles.title}>Successfully sent to</Text>
       <Text style={styles.amountText}>PHP  {amount}</Text>
-      <Text style={styles.receiptText}>Mobile No.                           {gcashNumber}</Text>
+      <Text style={styles.receiptText}>Mobile No. {gcashNumber}</Text>
       <View style={styles.qrCodeContainer}>
         <QRCode value={jsonString} size={200} />
       </View>

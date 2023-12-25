@@ -5,8 +5,7 @@ export default function PaypalForm() {
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
 
   const handleConfirmPayment = () => {
-    // Simulate payment confirmation logic here (e.g., call an API for payment verification)
-    // For demonstration purposes, we'll use a simple timeout to simulate the process.
+
     setTimeout(() => {
       setPaymentConfirmed(true);
     }, 1000);

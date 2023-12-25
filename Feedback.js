@@ -24,7 +24,6 @@ useEffect(() => {
   const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
     setUser(currentUser);
   });
-  // Cleanup subscription on unmount
   return () => unsubscribe();
 }, []);
 
@@ -148,9 +147,9 @@ useEffect(() => {
       <TextInput
       style={styles.input}
       placeholder="Company Address"
-      value={companyAddress} // Set the TextInput value to the companyAddress state
-      onChangeText={setCompanyAddress} // Optional: if you want to allow editing the auto-filled address
-      editable={false} // Set to false if you do not want the address to be editable
+      value={companyAddress} 
+      onChangeText={setCompanyAddress}
+      editable={false} 
     />
       <Text>Email</Text>
       <TextInput

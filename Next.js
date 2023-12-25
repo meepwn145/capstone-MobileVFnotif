@@ -6,7 +6,7 @@ export default function AnimatedCarScreen() {
   const navigation = useNavigation();
 
   useEffect(() => {
-    // Navigate to another page after 3 seconds
+
     const timer = setTimeout(() => {
       navigation.navigate('Login');
     }, 3000);
@@ -31,18 +31,18 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFF', // or any color that matches your design
+    backgroundColor: '#FFF', 
   },
   text: {
     marginTop: 20,
     fontSize: 15,
-    color: 'black', // You can change the color to match your design
+    color: 'black', 
     fontFamily: 'Courier New',
   },
   backgroundImage: {
-    ...StyleSheet.absoluteFillObject, // Makes the background fill the entire screen
+    ...StyleSheet.absoluteFillObject, 
     width: '100%',
     height: '100%',
-    resizeMode: 'cover' // Ensures that the background image covers the entire screen
+    resizeMode: 'cover'
   },
 });

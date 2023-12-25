@@ -32,7 +32,6 @@ export default function Dashboard() {
     setSidebarVisible(!isSidebarVisible);
   };
 
-  // Automatic carousel
   const flatListRef = useRef(null);
   const scrollInterval = useRef(null);
 
@@ -193,7 +192,7 @@ const styles = StyleSheet.create({
     height: '20%',
     resizeMode: 'contain',
     marginBottom: 15,
-    marginTop: 40, // Adjust the marginTop value to move the image lower
+    marginTop: 40,
 
   },
   footer: {

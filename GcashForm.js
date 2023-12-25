@@ -10,12 +10,12 @@ export default function GcashScreen({ navigation }) {
   const handleGcashNumberChange = (text) => {
     setGcashNumber(text);
     setShowAmountForm(false);
-    setErrorMessage(''); // Clear error message when GCash number changes
+    setErrorMessage(''); 
   };
 
   const handleAmountChange = (text) => {
     setAmount(text);
-    setErrorMessage(''); // Clear error message when amount changes
+    setErrorMessage(''); 
   };
 
   const handleConfirmPayment = () => {

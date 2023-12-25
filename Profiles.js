@@ -57,7 +57,7 @@ const Profs = () => {
     }, [user]);
     const formatDate = (timestamp) => {
       if (timestamp && timestamp.toDate) {
-        return timestamp.toDate().toLocaleString(); // Adjust the format as needed
+        return timestamp.toDate().toLocaleString(); 
       }
       return '';
     };
@@ -87,9 +87,9 @@ const Profs = () => {
     };
 
     const handleUpdate = async () => {
-      // Call the existing updateUserData function
+     
       await updateUserData();
-      // Clear the editing state
+ 
       setEditingField(null);
     };
   
@@ -99,7 +99,7 @@ const Profs = () => {
           value={value}
           onChangeText={setValue}
           style={styles.editableText}
-          onBlur={handleUpdate} // Save on blur or you can use a button to save
+          onBlur={handleUpdate}
         />
       ) : (
         <Text style={styles.itemSubtitle} onPress={() => setEditingField(field)}>
@@ -177,9 +177,8 @@ const Profs = () => {
         const storageRef = ref(storage, `profilePictures/${filename}`);
         await uploadBytes(storageRef, blob);
     
-        // Retrieve the download URL
         const downloadURL = await getDownloadURL(storageRef);
-        setProfileImageUrl(downloadURL); // Update the state with the new URL
+        setProfileImageUrl(downloadURL);
 
         if (auth.currentUser) {
           const userId = auth.currentUser.uid;
@@ -276,7 +275,7 @@ const Profs = () => {
               <Text style={styles.itemTitle}>Email</Text>
               <Text style={styles.itemSubtitle}>{email}</Text>
             </View>
-            <TouchableOpacity onPress={() => { /* handle edit */ }}>
+            <TouchableOpacity onPress={() => {  }}>
               <Text style={styles.editText}>Edit</Text>
             </TouchableOpacity>
              </View>
@@ -289,7 +288,7 @@ const Profs = () => {
             <Text style={styles.itemTitle}>Vehicle Plate Number </Text>
             {renderEditableView('carPlateNumber', plateNumber, setPlateNumber)}
             </View>
-            <TouchableOpacity onPress={() => { /* handle edit */ }}>
+            <TouchableOpacity onPress={() => {  }}>
               <Text style={styles.editText}>Edit</Text>
             </TouchableOpacity>
              </View>

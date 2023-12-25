@@ -291,8 +291,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   deleteButtonImage: {
-    width: 30, // Adjust the width as needed
-    height: 30, // Adjust the height as needed
-    resizeMode: 'contain', // This ensures the image is scaled proportionately
+    width: 30, 
+    height: 30,
+    resizeMode: 'contain', 
   },
 });

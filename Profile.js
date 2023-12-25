@@ -40,18 +40,18 @@ const Profs = () => {
     const imagesListRef = ref(storage, "images/");
     const uploadFile = async (uri) => {
       if (uri && auth.currentUser) {
-        const imageName = `${v4()}.jpg`; // Generate a new UUID for the image
+        const imageName = `${v4()}.jpg`; 
         const imageRef = ref(storage, `images/${imageName}`);
         const response = await fetch(uri);
         const blob = await response.blob();
   
-        // Start the upload process
+    
         await uploadBytes(imageRef, blob);
-        const url = await getDownloadURL(imageRef); // Corrected the promise handling here
+        const url = await getDownloadURL(imageRef); 
         console.log('Uploaded a blob or file!');
-        console.log('File available at', url); // Log the URL
-        setProfileImageUrl(url); // Update the state to show the new image
-        saveProfileImageUrl(url); // Save the image URL to Firestore
+        console.log('File available at', url);
+        setProfileImageUrl(url);
+        saveProfileImageUrl(url); 
       }
     };
     const pickImage = async () => {
@@ -64,7 +64,7 @@ const Profs = () => {
     
       if (!result.cancelled) {
         setImageUpload(result.uri);
-        // Upload the file after the image is picked
+
         uploadFile(result.uri);
       }
     };
@@ -139,17 +139,17 @@ const Profs = () => {
     };
 
     const handleSave = async () => {
-      // Log the current user (for debugging purposes)
+    
       console.log(auth.currentUser);
     
-      // Save the updated user data to Firestore
+      
       updateUserData();
     
-      // Check if there's a new image uploaded that hasn't been saved yet
+      
       if (imageUpload) {
-        // Save the image URL to Firestore and wait for it to finish
+       
         await saveProfileImageUrl(profileImageUrl);
-        // Reset the imageUpload state to indicate the image has been saved
+
         setImageUpload(null);
       }
     };
@@ -161,11 +161,11 @@ const toggleEditMode = () => {
   setIsEditMode(!isEditMode);
 };
 const uploadImage = async (imageUri) => {
-  // Assuming you have a function that handles the upload and returns the URL
-  const uploadUrl = await uploadFileToServer(imageUri); // Replace with your actual upload function
+  
+  const uploadUrl = await uploadFileToServer(imageUri);
 
-  console.log(uploadUrl); // Log the URL to check if it's correct
-  setProfileImageUrl(uploadUrl); // Update the state with the new URL
+  console.log(uploadUrl);
+  setProfileImageUrl(uploadUrl);
 };
   
 
@@ -180,7 +180,7 @@ const uploadImage = async (imageUri) => {
     <View style={styles.nameWithImageContainer}>
     <TouchableOpacity onPress={pickImage}>
 <Image
-key={profileImageUrl} // This will force the Image to rerender when profileImageUrl changes
+key={profileImageUrl} 
 
 style={styles.profilePicture}
 source={profileImageUrl ? { uri: `${profileImageUrl}?${new Date()}` } : require('./images/defualt.png')}
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     marginLeft: 100
-    // any other styles you need
+  
   },
   editModeInput: {
     borderBottomWidth: 2, 
@@ -369,7 +369,7 @@ nameWithImageContainer: {
   flexDirection: 'row',
   alignItems: 'center',
   marginTop: 30,
-  marginLeft: 30, // adjust this as needed to align with other elements on the page
+  marginLeft: 30,
 },
 sideImage: {
   width: 50,

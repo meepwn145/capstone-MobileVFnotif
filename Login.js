@@ -22,10 +22,10 @@ export function LoginScreen() {
 
   const handleLogin = async () => {
     try {
-      // Authenticate with Firebase
+
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
   
-      // Safety check to ensure user exists in the userCredential
+    
       if (!userCredential || !userCredential.user) {
         console.error('User not found in userCredential');
         return;
@@ -237,10 +237,10 @@ const styles = StyleSheet.create({
     alignItems:'left',
   },
   backgroundImage: {
-    ...StyleSheet.absoluteFillObject, // Makes the background fill the entire screen
+    ...StyleSheet.absoluteFillObject, 
     width: '100%',
     height: '100%',
-    resizeMode: 'cover' // Ensures that the background image covers the entire screen
+    resizeMode: 'cover' 
   },
 });
 
