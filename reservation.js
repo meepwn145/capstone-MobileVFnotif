@@ -36,6 +36,7 @@ export default function ReservationScreen({ route }) {
 
   const [reservations, setReservations] = useState([]);
 
+
   useEffect(() => {
     // Create a reference to the "reservations" collection in Firestore
     const reservationsRef = collection(db, 'reservations');
@@ -210,6 +211,40 @@ export default function ReservationScreen({ route }) {
       }
     };
 
+    useEffect(() => {
+      const slotDataRef = collection(db, 'slot', item.managementName, 'slotData');
+      const unsubscribe = onSnapshot(slotDataRef, (querySnapshot) => {
+        const fetchedSlots = new Map();
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.slotId !== undefined) {
+            // Assuming slotId in Firestore starts from 1, adjust if it starts from 0 or another number
+            const slotNumber = data.slotId + 1; // Adjust for zero-based indexing if needed
+            fetchedSlots.set(slotNumber, data.status); // Store status indexed by adjusted slot number
+            console.log('Fetched Slots:', fetchedSlots);
+          }
+        });
+    
+        setSlotSets(currentSlotSets => {
+          return currentSlotSets.map(floor => ({
+            ...floor,
+            slots: floor.slots.map((slot, index) => {
+              // Use index to match since slot.slotNumber might be causing the off-by-one error
+              const isOccupied = fetchedSlots.get(index + 1) === 'Occupied';
+              return {
+                ...slot,
+                occupied: isOccupied,
+              };
+            }),
+          }));
+        });
+      });
+    
+      return () => unsubscribe();
+    
+    }, []);
+    
+
 
     const handleReservation = () => {
       if (selectedSlot !== null && !reservedSlots.includes(selectedSlot)) {
@@ -351,23 +386,21 @@ export default function ReservationScreen({ route }) {
             <View key={index} style={styles.floorContainer}>
               <Text style={styles.floorTitle}>{floor.title}</Text>
               <View style={styles.slotContainer}>
-                {floor.slots.map((slot) => (
-                  <TouchableOpacity
-                  key={slot.id}
-                  style={[
-                    styles.slotButton,
-                    slot.occupied && styles.reservedSlotButton, // Apply red color if slot is reserved
-                    // other conditional styles
-                    selectedSlot === slot.slotNumber && styles.clickedSlotButton,
-                    reservedSlots.includes(slot.slotNumber) && styles.reservedSlotButton,
-                    slot.occupied && reservedSlots.includes(slot.slotNumber) && styles.usedSlotButton,
-                  ]}
-                  onPress={() => reserveSlot(slot.slotNumber)}
-                    disabled={slot.occupied}
-                  >
-                    <Text style={styles.slotButtonText}>{slot.slotNumber}</Text>
-                  </TouchableOpacity>
-                ))}
+              {floor.slots.map((slot) => (
+ <TouchableOpacity
+ key={slot.id}
+ style={[
+   styles.slotButton,
+   slot.occupied && styles.reservedSlotButton, // Apply red color if occupied
+ ]}
+ onPress={() => reserveSlot(slot.slotNumber)}
+ disabled={slot.occupied}
+>
+ <Text style={styles.slotButtonText}>{slot.slotNumber}</Text>
+</TouchableOpacity>
+
+))}
+
               </View>
             </View>
           ))
@@ -427,7 +460,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#27ae60',
   },
   reservedSlotButton: {
-    backgroundColor: '#FF0000', // Red color for reserved slots
+    backgroundColor: 'red', // This color will be used for occupied slots
   },
   scrollContainer: {
     flexGrow: 1,
@@ -460,7 +493,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   slotButton: {
-    backgroundColor: '#3498db',
+    backgroundColor: 'green',
     padding: 20,
     margin: 10,
     borderRadius: 10,
