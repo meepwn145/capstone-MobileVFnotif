@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
   notificationDate: {
     fontSize: 14,
     padding: 10,
-    color: 'gray', // style for the date text
+    color: 'gray', 
   },
   button: {
     backgroundColor: 'black',

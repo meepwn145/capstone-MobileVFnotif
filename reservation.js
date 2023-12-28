@@ -142,29 +142,34 @@ export default function ReservationScreen({ route }) {
   
     const processEstablishmentData = (establishmentData) => {
       let newSlotSets = [];
+      let slotCounter = 0; // Counter for continuous slot numbering
+      let slotIndex = slotCounter;
     
       if (Array.isArray(establishmentData.floorDetails) && establishmentData.floorDetails.length > 0) {
-        // Process floor details
-        newSlotSets = establishmentData.floorDetails.map(floor => ({
-          title: floor.floorName,
-          slots: Array.from({ length: parseInt(floor.parkingLots) }, (_, i) => ({
+        establishmentData.floorDetails.forEach((floor) => {
+          const floorSlots = Array.from({ length: parseInt(floor.parkingLots) }, (_, i) => ({
             id: `${floor.floorName}-${i + 1}`,
             floor: floor.floorName,
-            slotNumber: i + 1,
-            occupied: false // Default to not occupied
-          })),
-        }));
+            slotNumber: ++slotCounter, // Continuous slot number
+            occupied: false, // Default to not occupied
+            slotIndex,
+          }));
+    
+          newSlotSets.push({
+            title: floor.floorName,
+            slots: floorSlots,
+          });
+        });
       }
     
       if (establishmentData.totalSlots) {
-        // Process general parking if totalSlots is available
         const generalParkingSet = {
-          title: 'Total Parking Slots',
+          title: 'General Parking',
           slots: Array.from({ length: parseInt(establishmentData.totalSlots) }, (_, i) => ({
-            id: `General-${i + 1}`,
+            id: `General Parking-${i}`,
             floor: 'General',
-            slotNumber: i + 1,
-            occupied: false // Default to not occupied
+            slotNumber: ++slotCounter,
+            occupied: false,
           })),
         };
     
@@ -173,6 +178,8 @@ export default function ReservationScreen({ route }) {
     
       return newSlotSets;
     };
+    
+    
 
 
     const reserveSlot = (slotNumber) => {
@@ -210,7 +217,6 @@ export default function ReservationScreen({ route }) {
         }
       }
     };
-
     useEffect(() => {
       const slotDataRef = collection(db, 'slot', item.managementName, 'slotData');
       const unsubscribe = onSnapshot(slotDataRef, (querySnapshot) => {
@@ -218,31 +224,35 @@ export default function ReservationScreen({ route }) {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           if (data.slotId !== undefined) {
-            // Assuming slotId in Firestore starts from 1, adjust if it starts from 0 or another number
-            const slotNumber = data.slotId + 1; // Adjust for zero-based indexing if needed
-            fetchedSlots.set(slotNumber, data.status); // Store status indexed by adjusted slot number
-            console.log('Fetched Slots:', fetchedSlots);
+            fetchedSlots.set(data.slotId, data.status);
           }
         });
     
-        setSlotSets(currentSlotSets => {
-          return currentSlotSets.map(floor => ({
-            ...floor,
-            slots: floor.slots.map((slot, index) => {
-              // Use index to match since slot.slotNumber might be causing the off-by-one error
-              const isOccupied = fetchedSlots.get(index + 1) === 'Occupied';
-              return {
-                ...slot,
-                occupied: isOccupied,
-              };
-            }),
-          }));
+        setSlotSets((currentSlotSets) => {
+          return currentSlotSets.map((floor) => {
+            return {
+              ...floor,
+              slots: floor.slots.map((slot, index) => {
+                const slotId = `${floor.title}-${index}`;
+                const isOccupied = fetchedSlots.get(slotId) === 'Occupied';
+                console.log(`Comparing fetched slot ID: ${slotId} with status: ${isOccupied ? 'occupied' : 'not occupied'}`);
+                
+                return {
+                  ...slot,
+                  occupied: isOccupied,
+                };
+              }),
+            };
+          });
         });
       });
     
       return () => unsubscribe();
+    }, [db, item.managementName]);
     
-    }, []);
+    
+   
+    
     
 
 
@@ -391,14 +401,13 @@ export default function ReservationScreen({ route }) {
  key={slot.id}
  style={[
    styles.slotButton,
-   slot.occupied && styles.reservedSlotButton, // Apply red color if occupied
+   slot.occupied && styles.occupiedSlotButton, // Make sure this matches the style name
  ]}
  onPress={() => reserveSlot(slot.slotNumber)}
  disabled={slot.occupied}
 >
  <Text style={styles.slotButtonText}>{slot.slotNumber}</Text>
 </TouchableOpacity>
-
 ))}
 
               </View>
@@ -454,7 +463,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#3498db',
   },
   occupiedSlotButton: {
-    backgroundColor: '#95a5a6',
+    backgroundColor: 'red',
   },
   clickedSlotButton: {
     backgroundColor: '#27ae60',
