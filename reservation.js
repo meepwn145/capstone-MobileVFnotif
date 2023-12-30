@@ -283,7 +283,7 @@ export default function ReservationScreen({ route }) {
                   plateNumber: plateNumber || '',
                   slotId: selectedSlot,
                   managementName: item.managementName,
-                  timestamp: serverTimestamp(),
+                  timestamp: new Date(),
                 };
     
                 try {
@@ -338,7 +338,7 @@ export default function ReservationScreen({ route }) {
       carPlate: userCarPlate,
       slotId: slotId,
       managementName: item.managementName,
-      timestamp: serverTimestamp(),
+      timestamp: new Date(),
       occupied: true,
     };
   
