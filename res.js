@@ -11,6 +11,8 @@ import {
   deleteDoc,
   getDocs,
   updateDoc,
+  setDoc,
+  doc,
 } from 'firebase/firestore';
 import Swiper from 'react-native-swiper';
 import UserContext from './UserContext';
@@ -18,8 +20,6 @@ import firebase from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { Button } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
-
 const SLOT_PRICE = 30; // Assuming this is constant
 
 export default function ReservationScreen({ route }) {
@@ -33,7 +33,6 @@ export default function ReservationScreen({ route }) {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isSlotReserved, setIsSlotReserved] = useState(false);
-
   const [reservations, setReservations] = useState([]);
 
 
@@ -82,16 +81,36 @@ export default function ReservationScreen({ route }) {
     saveReservedSlots();
   }, [reservedSlots]);
 
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (user?.email) {
+        const userRef = doc(db, "users", user.email); 
+        try {
+          const docSnap = await getDoc(userRef);
+          if (docSnap.exists()) {
+            const userData = docSnap.data();
+            console.log("Fetched user data:", userData);
+            setPlateNumber(userData.carPlateNumber);
+          } else {
+            console.log("No such user document!");
+          }
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      }
+    };
+  
+    fetchUserData();
+  }, [user?.email]);
+  
+  
+
     useEffect(() => {
       if (!user) {
-        // Show a loading state or redirect to login if user is not logged in
         console.log("Waiting for user data to load or user is not logged in");
-        // Optionally navigate to login screen
-        // navigation.navigate('LoginScreen');
       } else {
         setEmail(user.email);
-        setPlateNumber(user.carPlate);
-        // ...rest of your code
+        setPlateNumber(user.carPlateNumber);
       }
     }, [user, navigation]);
     
@@ -101,7 +120,7 @@ export default function ReservationScreen({ route }) {
         console.log("Waiting for user data to load or user is not logged in");
       } else {
         setEmail(user.email);
-        setPlateNumber(user.carPlate);
+        setPlateNumber(user.carPlateNumber);
       }
   }, [user]);
 
@@ -110,11 +129,9 @@ export default function ReservationScreen({ route }) {
       const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
           if (firebaseUser) {
               setEmail(firebaseUser.email);
-              // Replace 'carPlateNumber' with the correct field name if different
               setPlateNumber(firebaseUser.carPlateNumber); 
           } else {
               console.log("User is not logged in");
-              // navigation.navigate('LoginScreen');
           }
       });
 
@@ -122,7 +139,7 @@ export default function ReservationScreen({ route }) {
       const unsubscribeSlots = onSnapshot(establishmentQuery, (snapshot) => {
         if (!snapshot.empty) {
           const establishmentData = snapshot.docs[0].data();
-          console.log("Establishment data:", establishmentData); // Check fetched data
+          console.log("Establishment data:", establishmentData);
           setSlotSets(processEstablishmentData(establishmentData));
         } else {
           console.log('Establishment data not found');
@@ -164,12 +181,12 @@ export default function ReservationScreen({ route }) {
     
       if (establishmentData.totalSlots) {
         const generalParkingSet = {
-          title: 'Total Parking Slots',
+          title: 'General Parking',
           slots: Array.from({ length: parseInt(establishmentData.totalSlots) }, (_, i) => ({
-            id: `General-${i + 1}`,
+            id: `General Parking-${i}`,
             floor: 'General',
-            slotNumber: ++slotCounter, // Continuous slot number
-            occupied: false, // Default to not occupied
+            slotNumber: ++slotCounter,
+            occupied: false,
           })),
         };
     
@@ -180,8 +197,6 @@ export default function ReservationScreen({ route }) {
     };
     
     
-
-
     const reserveSlot = (slotNumber) => {
       if (reservedSlots.includes(slotNumber)) {
         Alert.alert(
@@ -224,41 +239,38 @@ export default function ReservationScreen({ route }) {
         querySnapshot.forEach((doc) => {
           const data = doc.data();
           if (data.slotId !== undefined) {
-            fetchedSlots.set(data.slotId, data.status); // Use the slotId as is from Firestore
+            fetchedSlots.set(data.slotId, data.status);
           }
         });
     
         setSlotSets((currentSlotSets) => {
-          return currentSlotSets.map((floor) => ({
-            ...floor,
-            slots: floor.slots.map((slot, index) => {
-              // Correctly reconstruct the slotId for comparison with fetchedSlots
-              const slotId = floor.title === 'General Parking' ? `General-${index}` : `${floor.title}-${index}`;
-              const isOccupied = fetchedSlots.get(slotId) === 'Occupied';
-              console.log(`Slot ${slotId} is set to ${isOccupied ? 'occupied' : 'not occupied'}`);
-              return {
-                ...slot,
-                occupied: isOccupied,
-              };
-            }),
-          }));
+          return currentSlotSets.map((floor) => {
+            return {
+              ...floor,
+              slots: floor.slots.map((slot, index) => {
+                const slotId = `${floor.title}-${index}`;
+                const isOccupied = fetchedSlots.get(slotId) === 'Occupied';
+                console.log(`Comparing fetched slot ID: ${slotId} with status: ${isOccupied ? 'occupied' : 'not occupied'}`);
+                
+                return {
+                  ...slot,
+                  occupied: isOccupied,
+                };
+              }),
+            };
+          });
         });
       });
     
       return () => unsubscribe();
     }, [db, item.managementName]);
-    
-   
-    
-    
 
-
-    const handleReservation = () => {
+    
+    const handleReservation = async () => {
       if (selectedSlot !== null && !reservedSlots.includes(selectedSlot)) {
-        // Show a confirmation alert before making the reservation
         Alert.alert(
           'Confirm Reservation',
-          `Are you sure you want to reserve Slot ${selectedSlot}?`,
+          `Are you sure you want to reserve Slot ${selectedSlot}`,
           [
             {
               text: 'Cancel',
@@ -266,22 +278,39 @@ export default function ReservationScreen({ route }) {
             },
             {
               text: 'OK',
-              onPress: () => {
-                const updatedReservedSlots = [...reservedSlots, selectedSlot];
-                setReservedSlots(updatedReservedSlots);
-                setSelectedSlot(null);
+              onPress: async () => {
+                // Find the floor title for the selected slot
+                let floorTitle = "General Parking";
+                slotSets.forEach(set => {
+                  if (set.slots.some(slot => slot.slotNumber === selectedSlot)) {
+                    floorTitle = set.title;
+                  }
+                });
     
-                // Show a success alert after making the reservation
-                Alert.alert(
-                  'Reservation Successful',
-                  `Slot ${selectedSlot} reserved successfully!`,
-                  [
-                    {
-                      text: 'OK',
-                      style: 'default',
-                    },
-                  ]
-                );
+                const uniqueSlotId = `${floorTitle}-${selectedSlot}`;
+    
+                // Prepare the reservation data
+                const reservationData = {
+                  userEmail: email,
+                  plateNumber: plateNumber || '',
+                  slotId: uniqueSlotId,
+                  managementName: item.managementName,
+                  timestamp: new Date (), // Use Firebase server timestamp
+                  status: 'Reserved', // Marking the slot as Reserved
+                };
+    
+                try {
+                  // Reference to the reservations collection in Firebase
+                  const reservationsRef = collection(db, 'reservations');
+                  await setDoc(doc(reservationsRef, uniqueSlotId), reservationData, { merge: true });
+    
+                  setReservedSlots([...reservedSlots, selectedSlot]);
+                  setSelectedSlot(null);
+                  Alert.alert('Reservation Successful', `Slot ${selectedSlot} reserved successfully!`);
+                } catch (error) {
+                  console.error('Error saving reservation:', error);
+                  Alert.alert('Reservation Failed', 'Could not complete your reservation. Please try again.');
+                }
               },
             },
           ],
@@ -289,16 +318,12 @@ export default function ReservationScreen({ route }) {
         );
       } else {
         Alert.alert('Invalid Reservation', 'Please select a valid slot before reserving.', [
-          {
-            text: 'OK',
-            style: 'default',
-          },
+          { text: 'OK', style: 'default' },
         ]);
       }
     };
-
-
-
+    
+    
   const collectUserInfo = (slotId) => {
     const auth = getAuth();
     const user = auth.currentUser;
@@ -331,8 +356,9 @@ export default function ReservationScreen({ route }) {
   
     try {
       // Call the sendReservationToServer function to send reservation data
-      await sendReservationToServer(reservationData);
-  
+      
+      const reservationsRef = collection(db, 'reservations');
+    await addDoc(reservationsRef, reservationData);
       setReservedSlots([...reservedSlots, slotId]);
       setSelectedSlot(slotId);
       Alert.alert(
@@ -394,24 +420,23 @@ export default function ReservationScreen({ route }) {
               <Text style={styles.floorTitle}>{floor.title}</Text>
               <View style={styles.slotContainer}>
               {floor.slots.map((slot) => (
- <TouchableOpacity
- key={slot.id}
- style={[
-   styles.slotButton,
-   slot.occupied && styles.occupiedSlotButton, // Make sure this matches the style name
- ]}
- onPress={() => reserveSlot(slot.slotNumber)}
- disabled={slot.occupied}
->
- <Text style={styles.slotButtonText}>{slot.slotNumber}</Text>
-</TouchableOpacity>
+  <TouchableOpacity
+    key={slot.id}
+    style={[
+      styles.slotButton,
+      slot.occupied && styles.occupiedSlotButton,
+      selectedSlot === slot.slotNumber && styles.highlightedSlotButton, // Apply highlighted style
+    ]}
+    onPress={() => reserveSlot(slot.slotNumber)}
+    disabled={slot.occupied}
+  >
+    <Text style={styles.slotButtonText}>{slot.slotNumber}</Text>
+  </TouchableOpacity>
 ))}
-
               </View>
             </View>
           ))
         )}
-
         {isSlotReserved && (
           <View>
             <Text>Reserved Slot: {selectedSlot}</Text>
@@ -468,6 +493,7 @@ const styles = StyleSheet.create({
   reservedSlotButton: {
     backgroundColor: 'red', // This color will be used for occupied slots
   },
+
   scrollContainer: {
     flexGrow: 1,
   },
@@ -532,5 +558,9 @@ const styles = StyleSheet.create({
   reservedSlotsText: {
     fontSize: 16,
     marginTop: 20,
+  },
+  highlightedSlotButton: {
+    borderWidth: 3,
+    borderColor: 'red',
   },
 });
