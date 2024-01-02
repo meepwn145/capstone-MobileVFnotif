@@ -96,7 +96,7 @@ export default function ReservationScreen({ route }) {
   //     AsyncStorage.removeItem('reservedSlots')
   //       .then(() => console.log('Local storage cleared on component unmount'))
   //       .catch(error => console.error('Error clearing local storage:', error));
-  
+  //   }
   // }, []);
 
   useEffect(() => {
@@ -255,24 +255,52 @@ export default function ReservationScreen({ route }) {
     
     useEffect(() => {
       const slotDataRef = collection(db, 'slot', item.managementName, 'slotData');
-      const unsubscribe = onSnapshot(slotDataRef, (querySnapshot) => {
-          const fetchedSlots = new Map();
+      const resDataRef = collection(db, 'res', item.managementName, 'resData');
+  
+      let fetchedSlotData = new Map();
+      let fetchedResData = new Map();
+  
+      // Process slotData
+      const processSlotData = (querySnapshot) => {
           querySnapshot.forEach((doc) => {
-              const docName = doc.id; // This is something like 'slot_floorTitle_index'
+              const docName = doc.id;
               const [prefix, floor, index] = docName.split('_');
               if (prefix === 'slot' && floor && index !== undefined) {
                   const combinedId = `${floor}-${index}`;
-                  fetchedSlots.set(combinedId, doc.data().status);
+                  fetchedSlotData.set(combinedId, doc.data().status);
               }
           });
+      };
   
+      // Process resData
+      const processResData = (querySnapshot) => {
+          querySnapshot.forEach((doc) => {
+              fetchedResData.set(doc.id, doc.data().status);
+          });
+      };
+  
+      // Subscribe to slotData
+      const unsubscribeSlot = onSnapshot(slotDataRef, (querySnapshot) => {
+          processSlotData(querySnapshot);
+          updateSlotSets();
+      });
+  
+      // Subscribe to resData
+      const unsubscribeRes = onSnapshot(resDataRef, (querySnapshot) => {
+          processResData(querySnapshot);
+          updateSlotSets();
+      });
+  
+      // Function to update slotSets state
+      const updateSlotSets = () => {
           setSlotSets((currentSlotSets) => {
               return currentSlotSets.map((floor) => {
                   return {
                       ...floor,
                       slots: floor.slots.map((slot, index) => {
                           const combinedId = `${floor.title}-${index}`;
-                          const isOccupied = fetchedSlots.get(combinedId) === 'Occupied';
+                          const isOccupied = fetchedSlotData.get(combinedId) === 'Occupied' || 
+                                             fetchedResData.get(`slot_General Parking_${slot.slotNumber}`) === 'Occupied';
                           return {
                               ...slot,
                               occupied: isOccupied,
@@ -281,70 +309,73 @@ export default function ReservationScreen({ route }) {
                   };
               });
           });
-      });
+      };
   
-      return () => unsubscribe();
+      // Cleanup function
+      return () => {
+          unsubscribeSlot();
+          unsubscribeRes();
+      };
   }, [db, item.managementName]);
-
+  
     
-    const handleReservation = async () => {
-      if (selectedSlot !== null && !reservedSlots.includes(selectedSlot)) {
-        Alert.alert(
-          'Confirm Reservation',
-          `Are you sure you want to reserve Slot ${selectedSlot}`,
-          [
-            {
-              text: 'Cancel',
-              style: 'cancel',
-            },
-            {
-              text: 'OK',
-              onPress: async () => {
-                // Find the floor title for the selected slot
-                let floorTitle = "General Parking";
-                slotSets.forEach(set => {
-                  if (set.slots.some(slot => slot.slotNumber === selectedSlot)) {
-                    floorTitle = set.title;
-                  }
-                });
-    
-                const uniqueSlotId = `${floorTitle}-${selectedSlot}`;
-    
-                // Prepare the reservation data
-                const reservationData = {
-                  userEmail: email,
-                  plateNumber: plateNumber || '',
-                  slotId: uniqueSlotId,
-                  managementName: item.managementName,
-                  timestamp: new Date (), // Use Firebase server timestamp
-                  status: 'Reserved', // Marking the slot as Reserved
-                };
-    
-                try {
-                  // Reference to the reservations collection in Firebase
-                  const reservationsRef = collection(db, 'reservations');
-                  await setDoc(doc(reservationsRef, uniqueSlotId), reservationData, { merge: true });
-    
-                  setReservedSlots([...reservedSlots, selectedSlot]);
-                  setSelectedSlot(null);
-                  Alert.alert('Reservation Successful', `Slot ${selectedSlot} reserved successfully!`);
-                } catch (error) {
-                  console.error('Error saving reservation:', error);
-                  Alert.alert('Reservation Failed', 'Could not complete your reservation. Please try again.');
+  const handleReservation = async () => {
+    if (selectedSlot !== null && !reservedSlots.includes(selectedSlot)) {
+      Alert.alert(
+        'Confirm Reservation',
+        `Are you sure you want to reserve Slot ${selectedSlot}`,
+        [
+          {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
+            text: 'OK',
+            onPress: async () => {
+              // Find the floor title for the selected slot
+              let floorTitle =  "General Parking";
+              slotSets.forEach(set => {
+                if (set.slots.some(slot => slot.slotNumber === selectedSlot)) {
+                  floorTitle = set.title;
                 }
-              },
+              });
+  
+              const uniqueSlotId = `${floorTitle}_${selectedSlot}`;
+  
+              // Prepare the reservation data
+              const reservationData = {
+                userEmail: email,
+                plateNumber: plateNumber || '',
+                slotId: uniqueSlotId,
+                managementName: item.managementName,
+                timestamp: new Date (), // Use Firebase server timestamp
+                status: 'Reserved', // Marking the slot as Reserved
+              };
+  
+              try {
+                // Reference to the reservations collection in Firebase
+                const reservationsRef = collection(db, 'reservations');
+                await setDoc(doc(reservationsRef, uniqueSlotId), reservationData, { merge: true });
+  
+                setReservedSlots([...reservedSlots, selectedSlot]);
+                setSelectedSlot(null);
+                Alert.alert('Reservation Successful', `Slot ${selectedSlot} reserved successfully!`);
+              } catch (error) {
+                console.error('Error saving reservation:', error);
+                Alert.alert('Reservation Failed', 'Could not complete your reservation. Please try again.');
+              }
             },
-          ],
-          { cancelable: false }
-        );
-      } else {
-        Alert.alert('Invalid Reservation', 'Please select a valid slot before reserving.', [
-          { text: 'OK', style: 'default' },
-        ]);
-      }
-    };
-    
-    
+          },
+        ],
+        { cancelable: false }
+      );
+    } else {
+      Alert.alert('Invalid Reservation', 'Please select a valid slot before reserving.', [
+        { text: 'OK', style: 'default' },
+      ]);
+    }
+  };    
+  
   const collectUserInfo = (slotId) => {
     const auth = getAuth();
     const user = auth.currentUser;
@@ -374,7 +405,7 @@ export default function ReservationScreen({ route }) {
       timestamp: new Date(),
       occupied: true,
     };
-  
+
     try {
       // Call the sendReservationToServer function to send reservation data
       
@@ -479,7 +510,7 @@ export default function ReservationScreen({ route }) {
             <Text style={styles.reservedSlotsText}>Slot Reservation Request:</Text>
             <Text>STATUS: Pending.....</Text>
               {reservedSlots.map((reservedSlot) => (
-                <View key={reservedSlot} style={styles.reservedSlotButton}>
+                <View key={reservedSlot}style={styles.reservedSlotButton}>
                   <Text style={styles.slotButtonText}>{reservedSlot}</Text>
                 </View>
               ))}
