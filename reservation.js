@@ -253,54 +253,62 @@ export default function ReservationScreen({ route }) {
       }
     };
     
-    useEffect(() => {
-      const slotDataRef = collection(db, 'slot', item.managementName, 'slotData');
-      const resDataRef = collection(db, 'res', item.managementName, 'resData');
-  
-      let fetchedSlotData = new Map();
-      let fetchedResData = new Map();
-  
-      // Process slotData
-      const processSlotData = (querySnapshot) => {
+      useEffect(() => {
+        const slotDataRef = collection(db, 'slot', item.managementName, 'slotData');
+        const resDataRef = collection(db, 'res', item.managementName, 'resData');
+    
+        let fetchedSlotData = new Map();
+        let fetchedResData = new Map();
+    
+        // Process slotData
+        const processSlotData = (querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                const docName = doc.id;
+                const [prefix, floor, index] = docName.split('_');
+                if (prefix === 'slot' && floor && index !== undefined) {
+                    const combinedId = `${floor}-${index}`;
+                    fetchedSlotData.set(combinedId, doc.data().status);
+                }
+            });
+        };
+    
+        // Process resData
+        const processResData = (querySnapshot) => {
           querySnapshot.forEach((doc) => {
-              const docName = doc.id;
-              const [prefix, floor, index] = docName.split('_');
-              if (prefix === 'slot' && floor && index !== undefined) {
-                  const combinedId = `${floor}-${index}`;
-                  fetchedSlotData.set(combinedId, doc.data().status);
-              }
+              const data = doc.data();
+              const status = data.status;
+              const slotId = data.slotId;
+              // Since slotId might have different formats, we do not split it here
+              // Instead, we use it directly to set the fetched data
+              fetchedResData.set(slotId, status);
           });
       };
-  
-      // Process resData
-      const processResData = (querySnapshot) => {
-          querySnapshot.forEach((doc) => {
-              fetchedResData.set(doc.id, doc.data().status);
-          });
-      };
-  
-      // Subscribe to slotData
-      const unsubscribeSlot = onSnapshot(slotDataRef, (querySnapshot) => {
-          processSlotData(querySnapshot);
-          updateSlotSets();
-      });
-  
-      // Subscribe to resData
-      const unsubscribeRes = onSnapshot(resDataRef, (querySnapshot) => {
-          processResData(querySnapshot);
-          updateSlotSets();
-      });
-  
-      // Function to update slotSets state
-      const updateSlotSets = () => {
+    
+        // Subscribe to slotData
+        const unsubscribeSlot = onSnapshot(slotDataRef, (querySnapshot) => {
+            processSlotData(querySnapshot);
+            updateSlotSets();
+        });
+    
+        // Subscribe to resData
+        const unsubscribeRes = onSnapshot(resDataRef, (querySnapshot) => {
+            processResData(querySnapshot);
+            updateSlotSets();
+        });
+    
+        // Function to update slotSets state
+        const updateSlotSets = () => {
           setSlotSets((currentSlotSets) => {
               return currentSlotSets.map((floor) => {
                   return {
                       ...floor,
                       slots: floor.slots.map((slot, index) => {
-                          const combinedId = `${floor.title}-${index}`;
-                          const isOccupied = fetchedSlotData.get(combinedId) === 'Occupied' || 
-                                             fetchedResData.get(`slot_General Parking_${slot.slotNumber}`) === 'Occupied';
+                          const combinedId = `${floor.title}-${index}`; 
+                          const slotIdGeneral = `General Parking_${slot.slotNumber}`; 
+                          const slotIdLetter = `${floor.title.toLowerCase()}_${slot.slotNumber}`; 
+                          const isOccupied = fetchedSlotData.get(combinedId) === 'Occupied' ||
+                                             fetchedResData.get(slotIdGeneral) === 'Occupied' ||
+                                             fetchedResData.get(slotIdLetter) === 'Occupied';
                           return {
                               ...slot,
                               occupied: isOccupied,
@@ -310,13 +318,13 @@ export default function ReservationScreen({ route }) {
               });
           });
       };
-  
-      // Cleanup function
-      return () => {
-          unsubscribeSlot();
-          unsubscribeRes();
-      };
-  }, [db, item.managementName]);
+    
+        // Cleanup function
+        return () => {
+            unsubscribeSlot();
+            unsubscribeRes();
+        };
+    }, [db, item.managementName]);
   
     
   const handleReservation = async () => {
