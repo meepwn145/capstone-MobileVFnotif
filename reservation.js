@@ -199,7 +199,7 @@ export default function ReservationScreen({ route }) {
         });
       }
     
-      if (establishmentData.totalSlots) {
+      else if (establishmentData.totalSlots) {
         const generalParkingSet = {
           title: 'General Parking',
           slots: Array.from({ length: parseInt(establishmentData.totalSlots) }, (_, i) => ({
