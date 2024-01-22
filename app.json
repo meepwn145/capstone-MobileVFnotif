@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "users",
+    "sdkVersion": "49.0.0",
     "slug": "users",
     "version": "1.0.0",
     "orientation": "portrait",

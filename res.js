@@ -20,7 +20,7 @@ import firebase from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { Button } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-const SLOT_PRICE = 30; // Assuming this is constant
+const SLOT_PRICE = 30;
 
 export default function ReservationScreen({ route }) {
   const { item } = route.params;
@@ -37,10 +37,7 @@ export default function ReservationScreen({ route }) {
 
 
   useEffect(() => {
-    // Create a reference to the "reservations" collection in Firestore
     const reservationsRef = collection(db, 'reservations');
-
-    // Set up a real-time listener for the "reservations" collection
     const unsubscribe = onSnapshot(reservationsRef, (snapshot) => {
       const reservationData = snapshot.docs.map((doc) => ({
         id: doc.id,
@@ -179,7 +176,7 @@ export default function ReservationScreen({ route }) {
   
     const processEstablishmentData = (establishmentData) => {
       let newSlotSets = [];
-      let slotCounter = 0; // Counter for continuous slot numbering
+      let slotCounter = 0; 
       let slotIndex = slotCounter;
     
       if (Array.isArray(establishmentData.floorDetails) && establishmentData.floorDetails.length > 0) {
@@ -187,8 +184,8 @@ export default function ReservationScreen({ route }) {
           const floorSlots = Array.from({ length: parseInt(floor.parkingLots) }, (_, i) => ({
             id: `${floor.floorName}-${i + 1}`,
             floor: floor.floorName,
-            slotNumber: ++slotCounter, // Continuous slot number
-            occupied: false, // Default to not occupied
+            slotNumber: ++slotCounter,
+            occupied: false, 
             slotIndex,
           }));
     
@@ -199,7 +196,7 @@ export default function ReservationScreen({ route }) {
         });
       }
     
-      if (establishmentData.totalSlots) {
+      else if (establishmentData.totalSlots) {
         const generalParkingSet = {
           title: 'General Parking',
           slots: Array.from({ length: parseInt(establishmentData.totalSlots) }, (_, i) => ({
@@ -253,26 +250,60 @@ export default function ReservationScreen({ route }) {
       }
     };
     
-    useEffect(() => {
-      const slotDataRef = collection(db, 'slot', item.managementName, 'slotData');
-      const unsubscribe = onSnapshot(slotDataRef, (querySnapshot) => {
-          const fetchedSlots = new Map();
+      useEffect(() => {
+        const slotDataRef = collection(db, 'slot', item.managementName, 'slotData');
+        const resDataRef = collection(db, 'res', item.managementName, 'resData');
+    
+        let fetchedSlotData = new Map();
+        let fetchedResData = new Map();
+    
+        // Process slotData
+        const processSlotData = (querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                const docName = doc.id;
+                const [prefix, floor, index] = docName.split('_');
+                if (prefix === 'slot' && floor && index !== undefined) {
+                    const combinedId = `${floor}-${index}`;
+                    fetchedSlotData.set(combinedId, doc.data().status);
+                }
+            });
+        };
+    
+        // Process resData
+        const processResData = (querySnapshot) => {
           querySnapshot.forEach((doc) => {
-              const docName = doc.id; // This is something like 'slot_floorTitle_index'
-              const [prefix, floor, index] = docName.split('_');
-              if (prefix === 'slot' && floor && index !== undefined) {
-                  const combinedId = `${floor}-${index}`;
-                  fetchedSlots.set(combinedId, doc.data().status);
-              }
+              const data = doc.data();
+              const status = data.status;
+              const slotId = data.slotId;
+              fetchedResData.set(slotId, status);
           });
-  
+      };
+    
+        // Subscribe to slotData
+        const unsubscribeSlot = onSnapshot(slotDataRef, (querySnapshot) => {
+            processSlotData(querySnapshot);
+            updateSlotSets();
+        });
+    
+        // Subscribe to resData
+        const unsubscribeRes = onSnapshot(resDataRef, (querySnapshot) => {
+            processResData(querySnapshot);
+            updateSlotSets();
+        });
+    
+        // Function to update slotSets state
+        const updateSlotSets = () => {
           setSlotSets((currentSlotSets) => {
               return currentSlotSets.map((floor) => {
                   return {
                       ...floor,
                       slots: floor.slots.map((slot, index) => {
-                          const combinedId = `${floor.title}-${index}`;
-                          const isOccupied = fetchedSlots.get(combinedId) === 'Occupied';
+                          const combinedId = `${floor.title}-${index}`; 
+                          const slotIdGeneral = `General Parking_${slot.slotNumber}`; 
+                          const slotIdLetter = `${floor.title.toLowerCase()}_${slot.slotNumber}`; 
+                          const isOccupied = fetchedSlotData.get(combinedId) === 'Occupied' ||
+                                             fetchedResData.get(slotIdGeneral) === 'Occupied' ||
+                                             fetchedResData.get(slotIdLetter) === 'Occupied';
                           return {
                               ...slot,
                               occupied: isOccupied,
@@ -281,10 +312,15 @@ export default function ReservationScreen({ route }) {
                   };
               });
           });
-      });
+      };
+    
+        // Cleanup function
+        return () => {
+            unsubscribeSlot();
+            unsubscribeRes();
+        };
+    }, [db, item.managementName]);
   
-      return () => unsubscribe();
-  }, [db, item.managementName]);
     
   const handleReservation = async () => {
     if (selectedSlot !== null && !reservedSlots.includes(selectedSlot)) {
@@ -309,18 +345,17 @@ export default function ReservationScreen({ route }) {
   
               const uniqueSlotId = `${floorTitle}_${selectedSlot}`;
   
-              // Prepare the reservation data
               const reservationData = {
                 userEmail: email,
                 plateNumber: plateNumber || '',
                 slotId: uniqueSlotId,
                 managementName: item.managementName,
-                timestamp: new Date (), // Use Firebase server timestamp
-                status: 'Reserved', // Marking the slot as Reserved
+                timestamp: new Date (), 
+                status: 'Reserved', 
               };
   
               try {
-                // Reference to the reservations collection in Firebase
+               
                 const reservationsRef = collection(db, 'reservations');
                 await setDoc(doc(reservationsRef, uniqueSlotId), reservationData, { merge: true });
   
@@ -374,7 +409,6 @@ export default function ReservationScreen({ route }) {
     };
 
     try {
-      // Call the sendReservationToServer function to send reservation data
       
       const reservationsRef = collection(db, 'reservations');
     await addDoc(reservationsRef, reservationData);
@@ -424,9 +458,6 @@ export default function ReservationScreen({ route }) {
     }
   };
   
-  
-
-
   const totalAmount = reservedSlots.length * SLOT_PRICE;
   return (
     <ScrollView contentContainerStyle={styles.scrollContainer}>
@@ -444,7 +475,7 @@ export default function ReservationScreen({ route }) {
     style={[
       styles.slotButton,
       slot.occupied && styles.occupiedSlotButton,
-      selectedSlot === slot.slotNumber && styles.highlightedSlotButton, // Apply highlighted style
+      selectedSlot === slot.slotNumber && styles.highlightedSlotButton, 
     ]}
     onPress={() => reserveSlot(slot.slotNumber)}
     disabled={slot.occupied}
@@ -459,7 +490,6 @@ export default function ReservationScreen({ route }) {
         {isSlotReserved && (
           <View>
             <Text>Reserved Slot: {selectedSlot}</Text>
-            {/* Display any other reservation details here */}
           </View>
         )}
 
@@ -470,8 +500,6 @@ export default function ReservationScreen({ route }) {
           color="#2ecc71"
           accessibilityLabel="Reserve your selected parking slot"
         />
-
-        {/* Display the total amount if there are reserved slots */}
         {reservedSlots.length > 0 && (
           <View>
             <Text style={styles.reservedSlotsText}>Slot Reservation Request:</Text>
@@ -485,8 +513,6 @@ export default function ReservationScreen({ route }) {
             </View>
           </View>
         )}
-
-        {/* Display the total amount if there are reserved slots */}
         {reservedSlots.length > 0 && (
           <Text style={styles.totalAmountText}>
             Total Amount: PHP{totalAmount}
@@ -510,7 +536,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#27ae60',
   },
   reservedSlotButton: {
-    backgroundColor: 'red', // This color will be used for occupied slots
+    backgroundColor: 'red',
   },
 
   scrollContainer: {
