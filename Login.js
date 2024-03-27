@@ -64,11 +64,19 @@ export function LoginScreen() {
   
 
   return (
-    <SafeAreaView style={styles.container}>
+
+  
+
+    <View style={styles.container}>
       <Image
-           source={require('./images/login2-background.jpg')}
-           style={styles.backgroundImage}
-           />
+      source={require('./images/wingsMoto.png')}
+      style={styles.backgroundImage}
+    />
+    <Image
+      source={require('./images/backgroundWhite.png')}
+      style={[styles.backgroundImage, { borderTopLeftRadius: 130, marginTop: 100}]}
+    />
+    <Text style={{marginTop: 6, marginLeft: '35%', fontSize: 50, fontWeight: 'bold', color: 'white', marginVertical: 10}}>Login</Text>
     <View style={styles.formContainer}>
       <TextInput
         value={email}
@@ -95,32 +103,43 @@ export function LoginScreen() {
       <TouchableOpacity style={styles.button2} onPress={handleLogin}>
         <Text style={styles.buttonText}>Sign In</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={handleGoToSignIn}>
-      <Text style={styles.buttonText}>Create Account</Text>
+      <TouchableOpacity style={[styles.button, {borderColor: '#87CEEB'}]} onPress={handleGoToSignIn}>
+      <Text style={[styles.buttonText, {color: '#87CEEB'}]}>Create Account</Text>
       </TouchableOpacity>
       <View style={styles.separator}>
           <View style={styles.line} />
           <Text style={styles.orText}>OR</Text>
           <View style={styles.line} />
         </View>
-      <TouchableOpacity style={[styles.socialButton, { backgroundColor: '#3b5998' }]}>
-        <Text style={styles.socialButtonText}>
-        <Image
-       source={require('./images/facebook.png')}
-        style={styles.logo}
-        />
-          Continue with Facebook</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={[styles.socialButton,{ backgroundColor: '#1DA1F2' }]}>
-        <Text style={styles.socialButtonText}>
-        <Image
-           source={require('./images/google.png')}
-           style={styles.logo2}
-           />
-          Continue with Google</Text>
-      </TouchableOpacity>
-    </View>
-  </SafeAreaView>
+        <View style={styles.logoContainer}>
+  <TouchableOpacity style={styles.socialButton}>
+    <Image
+      source={require('./images/facebook.png')}
+      style={styles.logo}
+    />
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.socialButton}>
+    <Image
+      source={require('./images/googleLogo.png')}
+      style={styles.logo2}
+    />
+  </TouchableOpacity>
+  <TouchableOpacity style={styles.socialButton}>
+    <Image
+      source={require('./images/instagram.png')}
+      style={styles.logo2}
+    />
+         
+  </TouchableOpacity>
+</View>
+<TouchableOpacity onPress={handleGoToSignIn}>
+           <Text style={{color: '#d3d3d3', marginTop: 15, textAlign: 'center'}}>Dont have an account? <Text style={{color: '#FFD700', fontWeight: 'bold'}}>Signup</Text></Text>
+        </TouchableOpacity>
+          </View>
+        </View>
+ 
+ 
+
 );
 }
 
@@ -129,20 +148,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
+  signupText: {
+    color: 'red', // or any other color you prefer
+  },
   formContainer: {
-    padding: 20,
-    marginTop: 100,
+    padding: 40,
+    marginTop: '20%',
     fontFamily: 'Courier New',
   },
   input: {
-    backgroundColor: '#f0f0f0',
-    borderRadius: 5,
-    padding: 15,
+    backgroundColor: '#DEDEDE',
+    borderRadius: 100,
+    padding: 10,
     marginBottom: 15,
     fontSize: 16,
-    borderRadius: 20,
-    borderWidth: 1, 
-    borderColor: '#c0c0c0', 
     fontFamily: 'Courier New',
   },
   rememberMeContainer: {
@@ -154,7 +173,7 @@ const styles = StyleSheet.create({
     width: 20,
     height: 20,
     borderWidth: 1,
-    borderColor: '#c0c0c0',
+    borderColor: '#808080',
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 10,
@@ -166,48 +185,52 @@ const styles = StyleSheet.create({
   },
   rememberMeText: {
     flex: 1,
-    fontSize: 16,
-    color: '#fff',
+    fontSize: 14,
+    color: '#d3d3d3',
+    fontWeight: 'bold',
     fontFamily: 'Courier New',
   },
   forgotPasswordText: {
-    fontSize: 16,
-    color: '#96DED1',
+    fontSize: 14,
+    color: '#FFD700',
     fontFamily: 'Courier New',
-    
+    fontWeight: 'bold'
   },
   button: {
-    backgroundColor: '#3b89ac',
+    backgroundColor: 'white',
     paddingVertical: 15,
-    borderRadius: 5,
+    borderRadius: 100,
     alignItems: 'center',
-    marginBottom: 20,
+    borderWidth: 2,
+
   },
   button2: {
-    backgroundColor: 'green',
+    backgroundColor: '#39e75f',
     paddingVertical: 15,
-    borderRadius: 5,
-    alignItems: 'center',
+    borderRadius: 100,
     marginBottom: 10,
+    alignItems: 'center',
   },
   buttonText: {
     color: '#fff',
     fontSize: 16,
     fontFamily: 'Courier New',
+    
   },
   separator: {
     flexDirection: 'row',
     alignItems: 'center',
+    color: '#808080',
     marginVertical: 20,
   },
   line: {
     flex: 1,
     height: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFD700',
   },
   orText: {
     marginHorizontal: 10,
-    color: '#fff',
+    color: '#FFD700',
     marginBottom: 20,
   },
   socialButton: {
@@ -222,20 +245,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Courier New',
   },
+  logoContainer: {
+    flexDirection: 'row', // Arrange the logos side by side
+    justifyContent: 'space-around', // Space them evenly
+    marginBottom: 10,
+    marginTop: 10,
+  },
+  socialButton: {
+    alignItems: 'center',
+  },
   logo: {
-    width: 15,
-    height: 15,
-    marginRight: 10,
+    width: 50,
+    height: 50,
     resizeMode: 'contain',
-    alignItems:'left',
   },
   logo2: {
-    width: 15,
-    height: 15,
-    marginRight: 10,
+    width: 50,
+    height: 50,
     resizeMode: 'contain',
-    alignItems:'left',
   },
+
   backgroundImage: {
     ...StyleSheet.absoluteFillObject, 
     width: '100%',

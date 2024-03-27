@@ -60,23 +60,41 @@ export default function Search() {
   );
 
   return (
+
+  
+
     <View style={styles.container}>
+      
+      <Image
+      source={require('./images/wingsMoto.png')}
+      style={styles.backgroundImage}
+    />
+       <Text style={{color: 'white',  marginLeft: '30%',fontSize: 50, fontWeight: 'bold'}}>Search</Text>
+    <View style={styles.container}>
+ 
       <View style={styles.searchContainerStyle}>
         <TextInput
           style={styles.searchInput}
           placeholder="Search..."
           onChangeText={handleSearch}
           value={searchText}
-          placeholderTextColor="white"
+          placeholderTextColor="black"
         />
       </View>
       <Text style={styles.search}>Parking Lot Near You</Text>
       <FlatList
-        data={filteredData}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        ListEmptyComponent={() => <Text>No results found</Text>}
-      />
+  data={filteredData}
+  renderItem={renderItem}
+  keyExtractor={(item) => item.id}
+  ListEmptyComponent={() => (
+    <View style={styles.emptyListComponent}>
+      <Text style={styles.emptyListText}>No results found</Text>
+    </View>
+  )}
+/>
+      
+    </View>
+    
     </View>
   );
 }
@@ -84,29 +102,33 @@ export default function Search() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingTop: 40,
     backgroundColor: '#fff',
+    borderTopLeftRadius: 100,
   },
   search: {
     marginTop: 10,
     fontSize: 18,
     fontWeight: 'bold',
     marginBottom: 20,
+    textAlign: 'center',
   },
   searchInput: {
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,
     paddingHorizontal: 10,
-    borderRadius: 5,
-    color: 'white',
+    borderRadius: 10,
+    color: 'black',
+
   },
   item: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
+    padding: 5,
     borderBottomWidth: 1,
     borderBottomColor: 'gray',
+    borderRadius: 100,
   },
   itemImage: {
     width: 40,
@@ -118,14 +140,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   searchContainerStyle: {
-    height: 100,
-    backgroundColor: 'black',
+    height: 50,
     justifyContent: 'center',
     paddingHorizontal: 16,
-    shadowColor: 'rgba(0, 0, 0, 0.3)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.6,
-    elevation: 3,
+    marginTop: 20,
+    paddingHorizontal: '10%',
     marginBottom: 20,
+  },
+  backgroundImage: {
+    ...StyleSheet.absoluteFillObject, 
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover' 
+  },
+  emptyListComponent: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyListText: {
+    fontSize: 16,
+    color: 'gray',
   },
 });

@@ -5,22 +5,32 @@ export function Start({ navigation }) {
   const handleGoToDashboard = () => {
     navigation.navigate('Next');
   };
-
+  const handleGoToSignIn = () => {
+    navigation.navigate('SignUp');
+  };
   return (
+
     <View style={styles.container}>
       <ImageBackground
-        source={require('./images/busy.jpg')}
+        source={require('./images/SpotwiseLOGO.png')}
         style={styles.backgroundImage}
       >
+
         <View style={styles.overlay}>
-          
+          <Text style={{color: 'white', fontSize: 50, fontWeight: 'bold', marginBottom: '1%'}}>
+            Start with us Today  
+          </Text>  
           <Text style={styles.startText}>Find a suitable parking area near your location</Text>
           <TouchableOpacity style={styles.button} onPress={handleGoToDashboard}>
-            <Text style={styles.buttonText}>Get Started</Text>
+            <Text style={styles.buttonText}>Login</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.buttonSignup} onPress={handleGoToSignIn}>
+            <Text style={styles.buttonSignupText}>Signup</Text>
           </TouchableOpacity>
         </View>
       </ImageBackground>
     </View>
+    
   );
 }
 
@@ -49,20 +59,40 @@ const styles = StyleSheet.create({
   startText: {
     color: '#E9DBBD',
     fontSize: 20, 
-    marginTop: 20,
+    marginTop: 30,
     fontFamily: 'Courier New',
     textAlign: 'center',
   },
   button: {
     marginTop: 20,
     paddingVertical: 10,
-    paddingHorizontal: 20,
-    backgroundColor: '#A08C5B',
-    borderRadius: 5,
+    paddingHorizontal: '32%',
+    backgroundColor: '#39e75f',
+    borderRadius: 20,
     marginTop: 40,
+    borderWidth: 3,
+    borderColor: '#39e75f',
   },
   buttonText: {
-    color: '#fff',
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 16,
+    fontFamily: 'Courier New',
+    textAlign: 'center',
+  },
+  buttonSignup:{
+    paddingVertical: 10,
+    paddingHorizontal: '31%',
+    backgroundColor: 'white',
+    borderRadius: 50,
+    marginTop: 15,
+    borderWidth: 3,
+    borderColor: '#87CEEB',
+    
+  },
+  buttonSignupText: {
+    color: '#87CEEB',
+    fontWeight: 'bold',
     fontSize: 16,
     fontFamily: 'Courier New',
     textAlign: 'center',

@@ -49,9 +49,15 @@ export function SignupScreen() {
 
 
   return (
-    
+    <View style={{backgroundColor: 'white'}}>
+    <Image
+    source={require('./images/wingsMoto.png')}
+    style={styles.backgroundImage}
+  />
+    <Text style={styles.title}>Register</Text>
+    <Text style={{color: 'white', fontWeight: 'bold', marginLeft: '30%'}}>Create a new Account</Text>
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Create Account</Text>
+  
       <TextInput
         style={styles.input}
         placeholder="Name"
@@ -121,9 +127,10 @@ export function SignupScreen() {
         onChangeText={setCarPlateNumber}
       />
       <TouchableOpacity style={styles.button} onPress={handleSignup}>
-        <Text style={styles.buttonText}>Register</Text>
+        <Text style={styles.buttonText}>Signup</Text>
       </TouchableOpacity>
     </ScrollView>
+    </View>
   );
 }
 
@@ -133,32 +140,30 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start', // Align content to start from the top
     alignItems: 'stretch', // Stretch child components to match the width
     backgroundColor: '#f0f0f0', // Light background for a modern look
-    padding: 20,
-    borderRadius: 20,
-    
+    padding: 40,
+    marginTop: 15,
+    borderTopLeftRadius: 130,
+
   },
   title: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: '#333', // Darker font for better readability
-    alignSelf: 'center', // Center the title
-    marginVertical: 30, // Add vertical margin
+    fontSize: 50,
+    fontWeight: 'bold',
+    color: 'white', // Darker font for better readability
+    alignSelf: 'center', // Center the title 
   },
   input: {
-    height: 50,
-    borderWidth: 0,
-    borderBottomWidth: 2, // Underline style input
-    borderBottomColor: '#3b89ac',
+    height: 40,
     marginBottom: 15,
     paddingHorizontal: 10,
-    backgroundColor: '#fff', // White background for input
+    backgroundColor: '#DEDEDE',
     fontSize: 16, // Larger font size
-    borderRadius: 20,
+    borderRadius: 100,
+
   },
   button: {
-    backgroundColor: 'black', // A vibrant button color
+    backgroundColor: '#39e75f',
     paddingVertical: 12,
-    borderRadius: 15, // Rounded corners for buttons
+    borderRadius: 100, // Rounded corners for buttons
     marginTop: 20,
     shadowOpacity: 0.3, // Slight shadow for depth
     shadowRadius: 3,
@@ -178,27 +183,34 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   label: {
-    fontSize: 18,
+    fontSize: 16,
     color: '#333', // Dark label for readability
     marginBottom: 5, // Space between label and options
   },
   genderOption: {
     borderWidth: 0,
     borderBottomWidth: 2,
-    borderBottomColor: '#ccc',
+    borderBottomColor: '#FFD700',
     paddingVertical: 5,
     paddingHorizontal: 15,
     marginHorizontal: 5, // Add horizontal margin between buttons
     borderRadius: 25,
   },
   selectedGender: {
-    borderBottomColor: '#4169E1', // Highlight color for selected gender
-    backgroundColor: '#96DED1', // Light background for selected gender option
+    borderBottomColor: '#FFD700', // Highlight color for selected gender
+    backgroundColor: '#FFD700',
+   
   },
   genderText: {
     color: '#333',
     fontSize: 16,
     fontFamily: 'Courier New'
+  },
+  backgroundImage: {
+    ...StyleSheet.absoluteFillObject, 
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover' 
   },
 });
 export default SignupScreen;
