@@ -21,6 +21,21 @@ export default function Dashboard() {
     { image: require('./images/parking5.png'), text: 'Parking 5' },
   ];
 
+  const handleCarouselCard = (text) => {
+    setSidebarVisible(false);
+    if (text === 'Ayala Mall') {
+      navigation.navigate('Map');
+    } else if (text === 'CMall') {
+      navigation.navigate('Map');
+    } else if (text === 'Parkmall Manadaue') {
+      navigation.navigate('Map');
+    } else if (text === 'Parking 7') {
+      navigation.navigate('Map');
+    } else if (text === 'Parking 5') {
+      navigation.navigate('PMap');
+    }
+  };
+
   const handleCardClick = (screenName) => {
     setSidebarVisible(false);
     navigation.navigate(screenName);
@@ -61,10 +76,12 @@ export default function Dashboard() {
 
   const renderCarouselItem = ({ item }) => {
     return (
-      <View style={styles.carouselItemContainer}>
-        <Image source={item.image} style={styles.carouselImage} />
-        <Text style={styles.carouselText}>{item.text}</Text>
-      </View>
+      <TouchableOpacity onPress={() => handleCarouselCard(item.text)}>
+        <View style={styles.carouselItemContainer}>
+          <Image source={item.image} style={styles.carouselImage} />
+          <Text style={styles.carouselText}>{item.text}</Text>
+        </View>
+      </TouchableOpacity>
     );
   };
 
@@ -113,16 +130,13 @@ export default function Dashboard() {
               }}
             />
           </View>
-          <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-          <Image source={require('./images/adds.jpg')} style={{ height: '50%',width: '95%', marginTop: '-5%', borderRadius:8, borderWidth: 1, borderColor: 'white'}} />
-          </View>
           <View style={{ maxWidth: 350, marginBottom: 20 }}>
           <View style={{ flexDirection: 'row', marginBottom: 0 }}>
   <View style={{ flex: 1 , marginLeft: '5%'}}>
-    <Image source={require('./images/ayala.jpg')} style={{ width: '100%',marginTop: '-10%', borderBottomLeftRadius: 20, borderWidth: 1, borderColor: '#FFD700'}} />
+    <Image source={require('./images/ayala.jpg')} style={{ width: '100%',marginTop: '30%', borderBottomLeftRadius: 20, borderWidth: 1, borderColor: '#FFD700'}} />
   </View>
-  <View style={{ flex: 1.5, paddingTop: '11%'}}>
-    <View style={{ backgroundColor: 'white', opacity: 0.8, padding: '5%' , borderBottomRightRadius: 20}}>
+  <View style={{ flex: 1.5, paddingTop: '25.5%'}}>
+    <View style={{ backgroundColor: 'white', opacity: 0.8, padding: '6%' , borderBottomRightRadius: 20}}>
       <Text style={{ fontSize: 18, fontWeight: 'bold'}}>AyalaMall Cebu Center</Text>
       <Text style={{ fontSize: 14, color: '#888'}}>Last updated 3 mins ago</Text>
       <TouchableOpacity  onPress={handleViewRecentParked} style={{ marginTop: 13.4, backgroundColor: '#FFD700', padding: 1, borderRadius: 2 }}>

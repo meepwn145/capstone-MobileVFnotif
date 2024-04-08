@@ -7,16 +7,10 @@ export default function DetailsScreen({ route }) {
   const { item } = route.params;
   const navigation = useNavigation();
   return (
-   <View style = {styles.container}>
-    <Image
-      source={require('./images/dashboardBACKground.png')}
-      style={styles.backgroundImage}
-    />
+    
 
-    <View >
-      
-    </View>
-    <View >
+  <View>
+    
       <View style={styles.navbar}>
         <Text style={styles.navbarTitle}>Parking Information</Text>
       </View>
@@ -36,7 +30,7 @@ export default function DetailsScreen({ route }) {
         <Text style={styles.buttonText}>Direction</Text>
       </TouchableOpacity>
     </View>
-    </View>
+
   
   );
 }
@@ -44,7 +38,9 @@ export default function DetailsScreen({ route }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    paddingTop: 40,
     backgroundColor: '#fff',
+    borderTopLeftRadius: 100,
   },
 
   navbar: {

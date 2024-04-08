@@ -64,6 +64,11 @@ const Map = () => {
 
   }, [recentSearches]);
 
+  const handleButtonClick = () => {
+    console.log("Button clicked!");
+    // Implement your button click logic here
+  };
+
   return (
     <SafeAreaView style={containerStyle}>
       <View style={mapStyle}>
@@ -87,6 +92,11 @@ const Map = () => {
           />
         </View>
       </View>
+      <Button
+        title="Select Location"
+        onPress={handleButtonClick}
+        containerStyle={styles.buttonContainer}
+      />
       <View style={styles.menuBarStyle}>
         <Text>Recent places</Text>
         {recentSearches.map((search, index) => (
@@ -112,6 +122,11 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'space-between',
     padding: 16,
+  },
+  buttonContainer: {
+    position: 'absolute',
+    bottom: 20,
+    alignSelf: 'center',
   },
 });
 
