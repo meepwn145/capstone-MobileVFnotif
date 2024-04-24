@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert, ScrollView,Image } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { db } from './config/firebase';
 import {
@@ -20,6 +20,7 @@ import firebase from 'firebase/app';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { Button } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import style from 'react-native-modal-picker/style';
 const SLOT_PRICE = 30;
 
 export default function ReservationScreen({ route }) {
@@ -35,7 +36,7 @@ export default function ReservationScreen({ route }) {
   const [isSlotReserved, setIsSlotReserved] = useState(false);
   const [reservations, setReservations] = useState([]);
 
-
+   
   useEffect(() => {
     const reservationsRef = collection(db, 'reservations');
     const unsubscribe = onSnapshot(reservationsRef, (snapshot) => {
@@ -198,7 +199,8 @@ export default function ReservationScreen({ route }) {
     
       else if (establishmentData.totalSlots) {
         const generalParkingSet = {
-          title: 'General Parking',
+          title: '',
+          color: 'white',
           slots: Array.from({ length: parseInt(establishmentData.totalSlots) }, (_, i) => ({
             id: `General Parking-${i}`,
             floor: 'General',
@@ -460,72 +462,103 @@ export default function ReservationScreen({ route }) {
   
   const totalAmount = reservedSlots.length * SLOT_PRICE;
   return (
-    <ScrollView contentContainerStyle={styles.scrollContainer}>
-      <View style={styles.container}>
-        {isLoading ? (
-          <Text>Loading slots...</Text>
-        ) : (
-          slotSets.map((floor, index) => (
-            <View key={index} style={styles.floorContainer}>
-              <Text style={styles.floorTitle}>{floor.title}</Text>
-              <View style={styles.slotContainer}>
-              {floor.slots.map((slot) => (
-  <TouchableOpacity
-    key={slot.id}
-    style={[
-      styles.slotButton,
-      slot.occupied && styles.occupiedSlotButton,
-      selectedSlot === slot.slotNumber && styles.highlightedSlotButton, 
-    ]}
-    onPress={() => reserveSlot(slot.slotNumber)}
-    disabled={slot.occupied}
-  >
-    <Text style={styles.slotButtonText}>{slot.slotNumber}</Text>
-  </TouchableOpacity>
-))}
-              </View>
-            </View>
-          ))
-        )}
-        {isSlotReserved && (
-          <View>
-            <Text>Reserved Slot: {selectedSlot}</Text>
-          </View>
-        )}
 
-        {/* Reserve Button */}
-        <Button
-          title="Reserve Slot"
-          onPress={handleReservation}
-          color="#2ecc71"
-          accessibilityLabel="Reserve your selected parking slot"
-        />
-        {reservedSlots.length > 0 && (
-          <View>
-            <Text style={styles.reservedSlotsText}>Slot Reservation Request:</Text>
-            <Text>STATUS: Pending.....</Text>
-              {reservedSlots.map((reservedSlot) => (
-                <View key={reservedSlot}style={styles.reservedSlotButton}>
-                  <Text style={styles.slotButtonText}>{reservedSlot}</Text>
-                </View>
+
+    
+<View style={styles.container}>
+<ScrollView contentContainerStyle={styles.scrollContainer}>
+    <Image
+    source={require('./images/wingsMoto.png')}
+    style={styles.backgroundImage}
+  />
+  <Image
+    source={require('./images/backgroundWhite.png')}
+    style={[styles.backgroundImage, { borderTopLeftRadius: 130, marginTop: 100}]}
+  />
+<Text style={{alignSelf: 'center', fontSize: 40, fontWeight: 'bold', color: 'white', marginVertical: 10}}>Reservation</Text>
+    <View style={styles.container}>
+      {isLoading ? (
+        <Text>Loading slots...</Text>
+      ) : (
+        slotSets.map((floor, index) => (
+          <View key={index} style={styles.floorContainer}>
+            <Text style={styles.floorTitle}>{floor.title}</Text>
+            <View style={styles.slotContainer}>
+              {floor.slots.map((slot) => (
+                <TouchableOpacity
+                  key={slot.id}
+                  style={[
+                    styles.slotButton,
+                    slot.occupied && styles.occupiedSlotButton,
+                    selectedSlot === slot.slotNumber && styles.highlightedSlotButton,
+                  ]}
+                  onPress={() => reserveSlot(slot.slotNumber)}
+                  disabled={slot.occupied}
+                >
+                  <Text style={styles.slotButtonText}>{slot.slotNumber}</Text>
+                </TouchableOpacity>
               ))}
-               <View style={styles.slotContainer}>
             </View>
           </View>
-        )}
-        {reservedSlots.length > 0 && (
-          <Text style={styles.totalAmountText}>
-            Total Amount: PHP{totalAmount}
-          </Text>
-        )}
+        ))
+      )}
+      {isSlotReserved && (
+        <View>
+          <Text>Reserved Slot: {selectedSlot}</Text>
+        </View>
+      )}
+      {/* Reserve Button */}
+    </View>
+    
+  </ScrollView>
+  <View style={styles.cardContainer}>
+      <Button style={[{color: 'blue', borderRadius: 100}]}
+        title="Reserve Slot"
+        onPress={handleReservation}
+        color="#39e75f"
+        accessibilityLabel="Reserve your selected parking slot"
+      />
+      {reservedSlots.length > 0 && (
+        <View>
+          <Text style={styles.reservedSlotsText}>Slot Reservation Request:</Text>
+          <Text>STATUS: Pending.....</Text>
+          {reservedSlots.map((reservedSlot) => (
+            <View key={reservedSlot} style={styles.reservedSlotButton}>
+              <Text style={styles.slotButtonText}>{reservedSlot}</Text>
+            </View>
+          ))}
+          <View style={styles.slotContainer}></View>
+        </View>
+      )}
+      {reservedSlots.length > 0 && (
+        <Text style={styles.totalAmountText}>
+          Total Amount: PHP{totalAmount}
+        </Text>
+      )}
+       <View style={styles.divider}></View>
+      <Text style={styles.floorLable}>First Floor: B1</Text>
       </View>
-    </ScrollView>
+  </View>
 );
 }
 
-
 const styles = StyleSheet.create({
-
+  reserveSlotButtonText:{
+    borderRadius: 100,
+    width: 10,
+  },
+  floorLable:{
+    marginTop: '-5%',
+    fontSize: 35,
+    fontWeight: 'bold',
+  },
+  divider: {
+    height: 1,
+    backgroundColor: '#FFD700',
+    marginTop: 16, 
+    marginBottom: 16, 
+    padding: 1,
+  },
   vacantSlotButton: {
     backgroundColor: '#3498db',
   },
@@ -544,9 +577,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
+ 
   },
   title: {
     fontSize: 24,
@@ -567,7 +598,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    marginBottom: 20,
+    marginTop: '15%',
+    marginBottom: 100,
   },
   slotButton: {
     backgroundColor: 'green',
@@ -598,7 +630,7 @@ const styles = StyleSheet.create({
   },
   totalAmountText: {
     fontSize: 16,
-    marginTop: 10,
+    marginTop: '-40%',
   },
   reservedSlotsText: {
     fontSize: 16,
@@ -607,5 +639,69 @@ const styles = StyleSheet.create({
   highlightedSlotButton: {
     borderWidth: 3,
     borderColor: 'red',
+  },
+
+  dropdownContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  dropdownLabel: {
+    marginRight: 10,
+    fontSize: 16,
+  },
+  dropdown: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  floorButton: {
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    backgroundColor: '#3498db',
+    borderRadius: 5,
+    marginHorizontal: 5,
+  },
+  selectedFloorButton: {
+    backgroundColor: '#2ecc71',
+  },
+  floorButtonText: {
+    color: 'white',
+    fontSize: 16,
+  },
+  navigationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    backgroundColor: '#ffffff', // Background color of the navigation bar
+    borderTopWidth: 1,
+    borderTopColor: '#ccc', // Border color
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+
+  cardContainer: {
+    borderTopRightRadius: 40,
+    borderTopLeftRadius: 40,
+    backgroundColor: '#ffffff',
+    borderWidth: 3,
+    borderColor: '#FFD700', 
+    borderBottomWidth: 0,
+    padding: 20,
+    paddingTop: 25,
+    marginTop: '-20%',
+    height: '36%',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: {
+      width: 0,
+      height: 3,
+    },
+  },
+  backgroundImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
   },
 });

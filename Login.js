@@ -64,9 +64,6 @@ export function LoginScreen() {
   
 
   return (
-
-  
-
     <View style={styles.container}>
       <Image
       source={require('./images/wingsMoto.png')}
@@ -266,11 +263,12 @@ const styles = StyleSheet.create({
   },
 
   backgroundImage: {
-    ...StyleSheet.absoluteFillObject, 
+    ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
-    resizeMode: 'cover' 
+    resizeMode: 'cover',
   },
+
 });
 
 export default LoginScreen;

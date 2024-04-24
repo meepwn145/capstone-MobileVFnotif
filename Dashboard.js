@@ -4,6 +4,7 @@ import { AntDesign } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import UserContext from './UserContext';
 
+
 export default function Dashboard() {
   const navigation = useNavigation();
   const { user } = useContext(UserContext);
@@ -135,8 +136,8 @@ export default function Dashboard() {
   <View style={{ flex: 1 , marginLeft: '5%'}}>
     <Image source={require('./images/ayala.jpg')} style={{ width: '100%',marginTop: '30%', borderBottomLeftRadius: 20, borderWidth: 1, borderColor: '#FFD700'}} />
   </View>
-  <View style={{ flex: 1.5, paddingTop: '25.5%'}}>
-    <View style={{ backgroundColor: 'white', opacity: 0.8, padding: '6%' , borderBottomRightRadius: 20}}>
+  <View style={{ flex: 1.5, paddingTop: '11.5%'}}>
+    <View style={{ backgroundColor: 'white', opacity: 0.8, padding: '14.1%' , borderBottomRightRadius: 20}}>
       <Text style={{ fontSize: 18, fontWeight: 'bold'}}>AyalaMall Cebu Center</Text>
       <Text style={{ fontSize: 14, color: '#888'}}>Last updated 3 mins ago</Text>
       <TouchableOpacity  onPress={handleViewRecentParked} style={{ marginTop: 13.4, backgroundColor: '#FFD700', padding: 1, borderRadius: 2 }}>
@@ -149,7 +150,7 @@ export default function Dashboard() {
         </View>
 
         <View style={styles.tabBarContainer}>
-          <View style={[styles.tabBar, { opacity: 0.8 }]}>
+          <View style={[styles.tabBar]}>
             <TouchableOpacity style={styles.tabBarButton} onPress={goToProfile}>
               <AntDesign name="user" size={24} color="#A08C5B" />
               <Text style={styles.tabBarText}>Profile</Text>
@@ -279,14 +280,12 @@ const styles = StyleSheet.create({
   },
   tabBarContainer: {
     marginTop: '60%',
-  
   },
   tabBar: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     backgroundColor: 'white',
-    borderRadius: 10,
     paddingVertical: 10,
     elevation: 3,
   },

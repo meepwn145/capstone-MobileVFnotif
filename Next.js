@@ -9,20 +9,18 @@ export default function AnimatedCarScreen() {
 
     const timer = setTimeout(() => {
       navigation.navigate('Login');
-    }, 3000);
+    }, 1000);
 
     return () => clearTimeout(timer);
   }, [navigation]);
 
   return (
     <View style={styles.container}>
-        <Image
-           source={require('./images/next-background.jpg')}
-           style={styles.backgroundImage}
-           />
-      <ActivityIndicator size="large" color="#0000ff" />
-      <Text style={styles.text}>Please wait...</Text>
-    </View>
+    <Image
+      source={require('./images/spotWiseLogoV4.gif')}
+      style={styles.backgroundImage}
+    />
+  </View>
   );
 }
 

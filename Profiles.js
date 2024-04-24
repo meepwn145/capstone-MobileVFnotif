@@ -7,6 +7,15 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 import * as ImagePicker from 'expo-image-picker';
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
+const CustomCard = ({ children }) => {
+  return (
+    <View style={styles.cardContainer}>
+      {children}
+    </View>
+  );
+};
+
+
 const Profs = () => {
 
   const { user } = useContext(UserContext);
@@ -231,24 +240,35 @@ const Profs = () => {
 
   return (
     <ScrollView style={styles.container}>
+        <View style={styles.container}>
+          
+      <Image
+      source={require('./images/profileBackV2.png')}
+      style={styles.backgroundImage}
+    />
+    <View style={styles.section}>
+  <CustomCard>
       <View style={styles.header}>
-      {profileImageUrl && (
-    <Image source={{ uri: profileImageUrl }} style={styles.profileImage} />
-  )}
-  {image && <Image source={{ uri: image.uri }} style={{ width: 300, height: 300 }} />}
-        <Text style={styles.name}>{name}</Text>
-        <Text style={styles.occupation}>{email}</Text>
-        <View style={styles.buttonContainer}>
-  <TouchableOpacity onPress={pickImage} style={styles.uploadButton}>
-          <Text style={styles.uploadButtonText} >Pick Image</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={uploadImage} style={styles.uploadButton2}>
-          <Text style={styles.uploadButtonText} >Upload Image</Text>
-        </TouchableOpacity>
-        </View>
-      </View>
+    {profileImageUrl && (
+      <Image source={{ uri: profileImageUrl }} style={[styles.profileImage, styles.circularImage]} />
+    )}
+    {image && <Image source={{ uri: image.uri }} style={[styles.image, styles.circularImage]} />}
 
-      <View style={styles.section}>
+   
+  </View>
+
+  </CustomCard>
+  <Text style={styles.name}>{name}</Text>
+  <Text style={styles.occupation}>{email}</Text>
+  <View style={styles.buttonContainer}>
+      <TouchableOpacity onPress={pickImage} style={[styles.button, { borderColor: '#87CEEB' }]}>
+        <Text style={[styles.buttonText, { color: '#87CEEB' }]}>Pick Image</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={uploadImage} style={[styles.button2, { borderColor: '#87CEEB' }]}>
+        <Text style={styles.buttonText}>Upload Image</Text>
+      </TouchableOpacity>
+    </View>
+
         <View style={styles.subSection}>
         <Text style={styles.subHeader}>Basic Information</Text>
           <View style={styles.itemContainer}>
@@ -305,6 +325,7 @@ const Profs = () => {
         </View>
       </View>
       </View>
+      </View>
     </ScrollView>
   );
 };
@@ -312,10 +333,8 @@ const Profs = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
   },
   header: {
-    backgroundColor: '#F8F8FF',
     alignItems: 'center',
     padding: 20,
   },
@@ -328,19 +347,23 @@ const styles = StyleSheet.create({
     fontSize: 22,
     fontWeight: 'bold',
     marginTop: 10,
+    color: 'black',
+    alignSelf: 'center',
   },
   occupation: {
     fontSize: 16,
     color: '#666',
+    alignSelf: 'center',
   },
   address: {
     fontSize: 16,
     color: '#666',
+    alignSelf: 'center',
   },
   section: {
-    backgroundColor: 'white',
     padding: 20,
     borderBottomColor: '#D3D3D3',
+    marginTop: '20%',
   },
   sectionTitle: {
     fontSize: 18,
@@ -398,6 +421,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   subHeader: {
+    marginTop: '5%',
     fontSize: 16,
     fontWeight: 'bold',
     color: '#333',
@@ -420,7 +444,7 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: '#CDCDCD',
+    backgroundColor: '#FFD700',
     marginTop: 16, 
     marginBottom: 16, 
   },
@@ -431,21 +455,81 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     padding: 5,
   },
-  uploadButton: {
-    marginTop: 10,
-    backgroundColor: '#20B2AA',
-    padding: 10,
-    borderRadius: 5,
-  },
-  uploadButton2: {
-    marginTop: 10,
-    backgroundColor: '#89CFF0',
-    padding: 10,
-    borderRadius: 5,
-  },
   buttonContainer: {
     flexDirection: 'row', 
     marginTop: 10,
+    alignSelf: 'center',
+  },
+  button2: {
+    backgroundColor: '#39e75f',
+    paddingVertical: 8,
+    borderRadius: 100,
+    width: '40%',
+    height: 40,
+    alignItems: 'center',
+    marginLeft: '5%',
+    alignSelf: 'center',
+  },
+  button: {
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    borderRadius: 100,
+    paddingVertical: 5,
+    alignItems: 'center',
+    borderWidth: 2,
+    width: '40%',
+    height: 40,
+    alignContent: 'center',
+  },
+
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'Courier New',
+    
+  },
+  backgroundImage: {
+    ...StyleSheet.absoluteFillObject,
+    width: '100%',
+    height: '55%',
+    resizeMode: 'cover',
+  },
+  circularContainer: {
+    alignItems: 'center', // Center the image within the container
+  },
+  profileImage: {
+    // Your existing styles for the profile image
+    width: 300, 
+    height: 300,
+  },
+  image: {
+    // Your existing styles for other images
+    width: '129%', // Adjust the width to fill the circle
+    height: '121%', // Adjust the height to fill the circle
+    borderRadius: '0%',
+    marginTop: -19, // Apply a border radius to make it circular
+  },
+  circularImage: {
+    // Apply circular border radius to images
+    borderRadius: 150, // Half of your desired width or height for a perfect circle
+    overflow: 'hidden', // To ensure the content doesn't overflow the circular container
+  },
+  cardContainer: {
+    borderColor: 'white',
+    alignSelf: 'center',
+    borderRadius: 200, // Half of the desired width or height for a perfect circle
+    borderWidth: 2,
+    marginHorizontal: 10,
+    backgroundColor: '#fff',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    width: '50%', // Adjust the width as needed
+    aspectRatio: 1, // Ensure the aspect ratio remains 1:1 for a perfect circle
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
   },
 });
 

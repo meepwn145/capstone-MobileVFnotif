@@ -69,8 +69,12 @@ export default function Search() {
       source={require('./images/wingsMoto.png')}
       style={styles.backgroundImage}
     />
-       <Text style={{color: 'white',  marginLeft: '30%',fontSize: 50, fontWeight: 'bold'}}>Search</Text>
-    <View style={styles.container}>
+    <Image
+      source={require('./images/backgroundWhite.png')}
+      style={[styles.backgroundImage, { borderTopLeftRadius: 130, marginTop: 100}]}
+    />
+    <Text style={{marginTop: 6, marginLeft: '35%', fontSize: 50, fontWeight: 'bold', color: 'white', marginVertical: 10}}>Search</Text>
+    <View style={styles.formContainer}>
  
       <View style={styles.searchContainerStyle}>
         <TextInput
@@ -81,7 +85,7 @@ export default function Search() {
           placeholderTextColor="black"
         />
       </View>
-      <Text style={styles.search}>Parking Lot Near You</Text>
+      <Text style={styles.search}></Text>
       <FlatList
   data={filteredData}
   renderItem={renderItem}
@@ -102,18 +106,16 @@ export default function Search() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 40,
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 100,
   },
   search: {
     marginTop: 10,
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 50,
     textAlign: 'center',
   },
   searchInput: {
+    marginTop: 100,
     height: 40,
     borderColor: 'gray',
     borderWidth: 1,

@@ -43,13 +43,20 @@ function ParkScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.navbar}>
-        <Text style={styles.navbarTitle}>Parking</Text>
-      </View>
+      
+    <Image
+    source={require('./images/wingsMoto.png')}
+    style={styles.backgroundImage}
+  />
+  <Image
+    source={require('./images/backgroundWhite.png')}
+    style={[styles.backgroundImage, { borderTopLeftRadius: 130, marginTop: 100}]}
+  />
+
       <Text style={styles.para}>Parking Fee: 30 PHP</Text>
       <View style={styles.imageContainer}>
-        {loadingComplete && renderTimeUpButton()}
-        <Image source={require('./images/carp.jpg')} style={styles.image} />
+  {loadingComplete && renderTimeUpButton()}
+  <Image source={require('./images/parking.gif')} style={styles.image} />
         <View 
         style={[styles.loadingLine, { width: `${loadingPercentage}%` }]} />
       </View>
@@ -65,28 +72,22 @@ function ParkScreen() {
     </View>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    alignItems: 'stretch',
   },
   prog: {
+    marginBottom: '5%',
     textAlign: 'center',
     fontSize: 18,
   },
   para: {
-    marginTop: 25,
+    marginTop: '40%',
+    textAlign: 'center',
     color: 'black',
     marginBottom: 10,
     fontSize: 24,
     fontWeight:'bold',
-  },
-  navbar: {
-    backgroundColor: 'black',
-    padding: 10,
-    height: 80,
   },
   navbarTitle: {
     color: 'white',
@@ -112,8 +113,10 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: '#003851',
     padding: 10,
-    borderRadius: 10,
-    marginTop: 10,
+    borderRadius: 100,
+    width: '50%',
+    marginBottom: '20%',
+    alignSelf: 'center',
   },
   buttonText: {
     color: 'white',
@@ -128,9 +131,14 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   image: {
-    width: 300,
-    height: 300,
-    resizeMode: 'contain',
+    marginTop: '-35%', // Adjust the position as needed
+    width: '90%', // Adjust the width as needed
+    height: '70%', // Adjust the height as needed
+    alignSelf: 'center', // Center the image horizontally
+    resizeMode: 'contain', // Maintain aspect ratio without stretching
+    borderRadius: 10, // Apply a border radius
+    borderWidth: 1, // Add a border for better visibility
+    borderColor: '#ddd', // Border color
   },
   loadingLine: {
     position: 'absolute',
@@ -145,12 +153,11 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   timeUpText: {
-    marginTop: 30,
+    marginBottom: '40%',
     fontSize: 20,
     color: 'red',
     fontWeight: 'bold',
     textAlign: 'center',
-    marginLeft: 5,
   },
   logo: {
     width: 20,
@@ -160,6 +167,29 @@ const styles = StyleSheet.create({
   buttonTimeUp: {
     backgroundColor: 'red',
   },
+  backgroundImage: {
+    ...StyleSheet.absoluteFillObject, 
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover' 
+  },
+  cardContainer: {
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: '#ddd',
+    marginHorizontal: 10,
+    marginVertical: 5,
+    backgroundColor: '#fff',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+  },
 });
+
 
 export default ParkScreen;

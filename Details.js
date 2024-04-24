@@ -1,68 +1,65 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, TextInput} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native'; // Added Image import
 import { useNavigation } from '@react-navigation/native';
-import style from 'react-native-modal-picker/style';
+import { Card } from 'react-native-elements';
 
 export default function DetailsScreen({ route }) {
   const { item } = route.params;
   const navigation = useNavigation();
-  return (
-    
 
-  <View>
-    
-      <View style={styles.navbar}>
-        <Text style={styles.navbarTitle}>Parking Information</Text>
-      </View>
-      <View style={styles.containerUnderNavbar}>
-      <Text style={styles.para}>{item.managementName}</Text>
-        <Image source={{ uri: item.imageUrl }} style={styles.image} />
-        <Text style= {styles.para}>Located at</Text>
-        <Text style={styles.address}>{item.companyAddress}</Text>
-        <Text style={styles.para2}>Available Parking Space: {item.totalSlots}</Text>
-      </View>
+  return (
+    <View style={styles.container}>
+      <Image source={require('./images/wingsMoto.png')} style={styles.backgroundImage} />
+      <Image source={require('./images/backgroundWhite.png')} style={[styles.backgroundImage, { borderTopLeftRadius: 80, marginTop: 100, borderTopRightRadius: 80 }]} />
+
+      <Text style={styles.titleText}>Details</Text>
+
+      <Card containerStyle={styles.cardContainer}>
+        <View>
+          <Text style={styles.headerName}>{item.managementName}</Text>
+          <Image source={{ uri: item.imageUrl }} style={styles.image} />
+          <Text style={styles.para1}>Operation</Text>
+          <Text style={styles.para1}>Open Now: 10:00AM - 11:30PM</Text>
+          <Text style={styles.para}>Located at</Text>
+          <Text style={styles.address}>{item.companyAddress}</Text>
+          <Text style={styles.para}>Available Parking Space: {item.totalSlots}</Text>
+        </View>
+      </Card>
 
       <TouchableOpacity onPress={() => navigation.navigate('reservation', { item: item })} style={styles.buttonReserve}>
-  <Text style={styles.buttonText}>Reserve</Text>
-</TouchableOpacity>
+        <Text style={styles.buttonText1}>Reserve</Text>
+      </TouchableOpacity>
 
       <TouchableOpacity onPress={() => navigation.navigate('Map')} style={styles.button}>
         <Text style={styles.buttonText}>Direction</Text>
       </TouchableOpacity>
     </View>
-
-  
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 40,
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 100,
   },
-
-  navbar: {
-    backgroundColor: 'black',
-    padding: 10,
-    height: 80,
-    marginTop: '40%',
-    width: '80%',
-    marginLeft: '10%',
-
-  },
-  navbarTitle: {
+  titleText: {
     color: 'white',
-    fontSize: 18,
+    fontSize: 50,
     fontWeight: 'bold',
     textAlign: 'center',
-    fontSize: 20,
-    marginTop: 20,
+    marginTop: 10,
   },
-  containerUnderNavbar: {
-    marginTop: 20,
-    alignItems: 'center',
+  para1:{
+    fontSize: 14,
+    marginTop: 10,
+    color: 'gray',
+  },
+  para: {
+    fontSize: 14,
+    marginTop: 10,
+  },
+  address: {
+    color: 'gray',
+    fontSize: 15,
   },
   image: {
     width: 200,
@@ -70,40 +67,37 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
     marginBottom: 10,
   },
-  para2: {
-    marginTop: 30,
-    fontSize: 18,
-  },
-  para: {
-    marginTop: 10,
-    fontSize: 18,
-    marginBottom: 30,
-  },
   button: {
-    backgroundColor: 'black',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 5,
+    backgroundColor: '#39e75f',
+    paddingVertical: 15,
+    borderRadius: 100,
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 20, 
-    position: 'absolute', 
-    bottom: 0, 
-    width: '100%', 
-    marginLeft: 20,
+    paddingHorizontal: 24, // Removed duplicate property
+    marginTop: -20, // Adjusted marginTop
+    marginBottom: 80, // Adjusted marginBottom
+    width: '90%',
+    alignSelf: 'center',
   },
   buttonReserve: {
-    backgroundColor: 'black',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 5,
+    borderColor: '#87CEEB',
+    backgroundColor: 'white',
+    paddingVertical: 15,
+    borderRadius: 100,
     alignItems: 'center',
-    marginTop: 20,
-    marginBottom: 100, 
-    position: 'absolute', 
-    bottom: 0, 
-    width: '100%', 
-    marginLeft: 20,
+    borderWidth: 2,
+    marginTop: 30, // Adjusted marginTop
+    marginBottom: 30, // Adjusted marginBottom
+    width: '90%',
+    alignSelf: 'center',
+  },
+  cardContainer: {
+    marginTop: '20%',
+    borderWidth: 1,
+    borderColor: '#FFD700',
+    borderTopLeftRadius: 50,
+    borderTopRightRadius: 50,
+    marginHorizontal: 20,
+    elevation: 3, // Shadow
   },
   buttonText: {
     color: 'white',
@@ -111,18 +105,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   buttonText1: {
-    color: 'white',
+    color: '#87CEEB',
     fontSize: 16,
     fontWeight: 'bold',
   },
-  address: {
-    color: 'gray',
-    fontSize: 15,
+  headerName:{
+    fontSize: 16,
+    marginTop: 10,
+    color: '#87CEEB',
   },
   backgroundImage: {
-    ...StyleSheet.absoluteFillObject, 
+    ...StyleSheet.absoluteFillObject,
     width: '100%',
-    height: '20%',
-    resizeMode: 'cover' ,
+    height: '100%',
+    resizeMode: 'cover',
   },
 });

@@ -134,10 +134,22 @@ export default function Notifications() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.navbar}>
-        <Text style={styles.navbarTitle}>Parking Notification</Text>
-      </View>
+   
+    
+    <ScrollView style={styles.backgroundColorMain}> 
+      <View style={styles.container}>
+       <Image
+      source={require('./images/wingsMoto.png')}
+      style={styles.backgroundImage}
+    />
+    <Image
+      source={require('./images/backgroundWhite.png')}
+      style={[styles.backgroundImage, {marginTop: 100}]}
+    />
+    <Text style={{marginTop: 6, textAlign: 'center', fontSize: 50, fontWeight: 'bold', color: 'white', marginVertical: 10}}>Notification</Text>
+    <View style={styles.formContainer}></View>
+
+   
       <View style={styles.content}>
         {parkingLogs.length > 0 ? (
           parkingLogs.map((log) => (
@@ -146,7 +158,7 @@ export default function Notifications() {
               style={styles.notification}
               onPress={() => toggleSelection(log.id)}
             >
-              <Text style={styles.notificationText}>
+              <Text style={styles.notificationHeader1}>
                 Parked at: {log.managementName}
               </Text>
               <Text style={styles.notificationText}>
@@ -174,64 +186,67 @@ export default function Notifications() {
             </TouchableOpacity>
           ))
         ) : (
-          <Text style={styles.notificationText}>No new parking notification</Text>
+          <Text style={[styles.notificationText, { textAlign: 'center' }]}>No new reservation notification</Text>
         )}
+        
       </View>
 
       <View style={styles.content}>
-        {reserveLogs.length > 0 ? (
-          reserveLogs.map((log) => (
-            <TouchableOpacity
-              key={log.id}
-              style={styles.notification}
-              onPress={() => toggleSelection(log.id)}
-            >
-              <Text style={styles.notificationText}>
-              Reserved at: {log.managementName}
-              </Text>
-              <Text style={styles.notificationText}>
-                Slot Number: {log.slotId}
-              </Text>
-              <Text style={styles.notificationDate}>
-                Date: {new Date(log.timestamp.seconds * 1000).toLocaleDateString()} 
-              </Text>
-              {selectedId === log.id && (
-                <TouchableOpacity
-                  onPress={() => deleteNotification2(log.id)}
-                  style={styles.deleteButton}
-                >
-                    <Image 
-                      source={require('./images/del.png')}
-                      style={styles.deleteButtonImage}
-                    />
-                </TouchableOpacity>
-              )}
-            </TouchableOpacity>
-          ))
-        ) : (
-          <Text style={styles.notificationText}>No new reservation notification</Text>
+  {reserveLogs.length > 0 ? (
+    reserveLogs.map((log) => (
+      <TouchableOpacity
+        key={log.id}
+        style={[styles.notification, selectedId === log.id && styles.selectedNotification]}
+        onPress={() => toggleSelection(log.id)}
+      >
+        <View style={styles.notificationInfo}>
+          <Text style={styles.notificationText}>
+            Reserved at: {log.managementName}
+          </Text>
+          <Text style={styles.notificationText}>
+            Slot Number: {log.slotId}
+          </Text>
+          <Text style={styles.notificationDate}>
+            Date: {new Date(log.timestamp.seconds * 1000).toLocaleDateString()} 
+          </Text>
+        </View>
+        {selectedId === log.id && (
+          <TouchableOpacity
+            onPress={() => deleteNotification2(log.id)}
+            style={styles.deleteButton}
+          >
+            <Image 
+              source={require('./images/del.png')}
+              style={styles.deleteButtonImage}
+            />
+          </TouchableOpacity>
         )}
-      </View>
-      
+      </TouchableOpacity>
+    ))
+  ) : (
+    <Text style={styles.notificationText}>No new reservation notification</Text>
+  )}
+</View>
+
       <View>
-      <TouchableOpacity onPress={() => navigation.navigate('Dashboard')} style={styles.button}>
-        <Text style={styles.buttonText}>Back</Text>
+      <TouchableOpacity onPress={() => navigation.navigate('Dashboard')} style={styles.buttonBack}>
+        <Text style={styles.buttonTextBack}>Back</Text>
       </TouchableOpacity>
       </View>
+      </View>
     </ScrollView>
+
+
   );
 }
 
 
 const styles = StyleSheet.create({
+  backgroundColorMain:{
+    backgroundColor: 'white',
+  },
   container: {
     flex: 1,
-    padding: 20,
-  },
-  navbar: {
-    backgroundColor: 'black',
-    padding: 10,
-    height: 80,
   },
   navbarTitle: {
     color: 'white',
@@ -242,36 +257,57 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    marginTop: 20,
+    justifyContent: 'center', // Center vertically
+    alignItems: 'center',
   },
   notification: {
-    padding: 10,
+    marginTop: '15%',
     marginVertical: 5,
     borderWidth: 1,
     borderColor: '#ccc',
-    borderRadius: 5,
+    borderRadius: 10,
+    width: '90%',
+    alignItems: 'center', // Center horizontally
     backgroundColor: '#fff', // or any other color for non-clicked notification
+  },
+  notificationHeader1:{
+    fontSize: 16,
+    padding: 10,
+    fontWeight: 'bold',
+
   },
   notificationText: {
     fontSize: 16,
     padding: 10,
-  },
+    },
+    
+    notificationTextHeader: {
+      fontSize: 16,
+      padding: 10,
+      textAlign: 'center',
+      },
   notificationDate: {
     fontSize: 14,
     padding: 10,
     color: 'gray', 
   },
-  button: {
-    backgroundColor: 'black',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 5,
+  buttonBack: {
+    borderColor: '#87CEEB',
+    backgroundColor: 'white',
+    paddingVertical: 15,
+    borderRadius: 100,
     alignItems: 'center',
-    marginTop: 10,
-    marginBottom: 10,
-    position: 'center',
-    bottom: 0,
-    width: '100%',
+    borderWidth: 2,
+    marginTop: '70%', // Adjusted marginTop
+    marginBottom: 30, // Adjusted marginBottom
+    width: '90%',
+    alignSelf: 'center',
+  },
+
+  buttonTextBack: {
+    color: '#87CEEB',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
   buttonText: {
     color: 'white',
@@ -294,5 +330,11 @@ const styles = StyleSheet.create({
     width: 30, 
     height: 30,
     resizeMode: 'contain', 
+  },
+  backgroundImage: {
+    ...StyleSheet.absoluteFillObject, 
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover' 
   },
 });
