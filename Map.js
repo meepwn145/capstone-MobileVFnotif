@@ -1,133 +1,265 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, Dimensions, SafeAreaView, StyleSheet } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
-import { Button } from 'react-native-elements';
-import Constants from 'expo-constants';
+import React, { useState, useEffect, useRef } from "react";
+import { View, Text, TextInput, SafeAreaView, StyleSheet, Dimensions } from "react-native";
+import MapView, { Marker, AnimatedRegion } from "react-native-maps";
+import { Button } from "react-native-elements";
+import Constants from "expo-constants";
+import { useStoreState } from "pullstate";
+import { LocationStore } from "./store";
+import { collection, getDocs, query, orderBy, startAt, endAt } from "firebase/firestore";
+import { db } from "./config/firebase";
+import MapViewDirections from "react-native-maps-directions";
+import * as geofire from "geofire-common";
+import * as Location from "expo-location";
 
-const windowWidth = Dimensions.get('window').width;
-const windowHeight = Dimensions.get('window').height;
+const screen = Dimensions.get("window");
+const ASPECT_RATIO = screen.width / screen.height;
+const LATITUDE_DELTA = 0.03;
+const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
+const API_KEY = "AIzaSyBR5rRsw0Z-1hcxMWFz56mo4yJjlaELprg";
 
 const Map = () => {
-  const [map, setMap] = useState(null);
-  const [autocomplete, setAutocomplete] = useState(null);
-  const [center, setCenter] = useState({
-    latitude: 10.3157,
-    longitude: 123.8854,
-    latitudeDelta: 0.0922,
-    longitudeDelta: 0.0421,
-  });
-  const [recentSearches, setRecentSearches] = useState([]);
-  const [selectedPlace, setSelectedPlace] = useState(null);
+    const [map, setMap] = useState(null);
+    const [autocomplete, setAutocomplete] = useState(null);
 
-  const containerStyle = {
-    flex: 1,
-    display: 'flex',
-  };
+    const [recentSearches, setRecentSearches] = useState([]);
+    const [selectedPlace, setSelectedPlace] = useState(null);
+    const [recommendedPlaces, setRecommendedPlaces] = useState([]);
+    // const [destination, setDestination] = useState({});
+    const [showDirections, setShowDirections] = useState(false);
+    const location = useStoreState(LocationStore);
 
-  const mapStyle = {
-    height: '100%',
-    width: '100%',
-  };
+    const [state, setState] = useState({
+        current: {
+            latitude: location.lat,
+            longitude: location.lng,
+        },
+        destination: {},
+        coordinate: new AnimatedRegion({
+            latitude: location.lat,
+            longitude: location.lng,
+            latitudeDelta: LATITUDE_DELTA,
+            longitudeDelta: LONGITUDE_DELTA,
+        }),
+    });
 
-  const searchContainerStyle = {
-    height: 60,
-    position: 'absolute',
-    top: Constants.statusBarHeight + 10, 
-    left: 0,
-    right: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-    backgroundColor: 'black',
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    shadowColor: 'rgba(0, 0, 0, 0.3)',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.6,
-    elevation: 3,
-  };
+    const { current, destination, coordinate } = state;
 
-  const onLoad = (mapInstance) => {
-    setMap(mapInstance);
-  };
+    const mapRef = useRef();
+    const markerRef = useRef();
 
-  const onPlaceChanged = () => {
-  
-  };
+    useEffect(() => {
+        fetchNearbyParking();
 
-  useEffect(() => {
-    const savedRecentSearches = [];
-    setRecentSearches(savedRecentSearches);
-  }, []);
+        const savedRecentSearches = [];
+        setRecentSearches(savedRecentSearches);
+    }, []);
 
-  useEffect(() => {
+    // Fetch location every 5 seconds
+    useEffect(() => {
+        const interval = setInterval(() => {
+            getCurrentLoc();
+        }, 5000);
+        return () => clearInterval(interval);
+    }, []);
 
-  }, [recentSearches]);
+    const fetchNearbyParking = async () => {
+        console.log("location", location);
+        const center = [location.lat, location.lng];
+        // Change this to preferred radius, 50 * 1000 is 50km
+        const radiusInM = 5 * 1000;
 
-  const handleButtonClick = () => {
-    console.log("Button clicked!");
-    // Implement your button click logic here
-  };
+        // Fetch establishments order by nearest
+        const bounds = geofire.geohashQueryBounds(center, radiusInM);
+        const promises = [];
+        for (const b of bounds) {
+            const q = query(collection(db, "establishments"), orderBy("geohash"), startAt(b[0]), endAt(b[1]));
 
-  return (
-    <SafeAreaView style={containerStyle}>
-      <View style={mapStyle}>
-        <MapView style={{ height: '100%', width: '100%' }} region={center} onRegionChangeComplete={setCenter}>
-          {selectedPlace && (
-            <Marker coordinate={{ latitude: selectedPlace.lat, longitude: selectedPlace.lng }} />
-          )}
-        </MapView>
-        <View style={searchContainerStyle}>
-          <TextInput
-            placeholder="Search for a place"
-            style={{
-              width: '100%',
-              height: 40,
-              marginBottom: 10,
-              borderRadius: 3,
-              backgroundColor: '#f2f2f2',
-              fontSize: 14,
-              paddingHorizontal: 10,
-            }}
-          />
-        </View>
-      </View>
-      <Button
-        title="Select Location"
-        onPress={handleButtonClick}
-        containerStyle={styles.buttonContainer}
-      />
-      <View style={styles.menuBarStyle}>
-        <Text>Recent places</Text>
-        {recentSearches.map((search, index) => (
-          <View key={index}>
-            <Text>{search.name}</Text>
-            <Text>{search.address}</Text>
-          </View>
-        ))}
-      </View>
-    </SafeAreaView>
-  );
+            promises.push(getDocs(q));
+        }
+
+        // Collect all the query results together into a single list
+        const snapshots = await Promise.all(promises);
+
+        const matchingDocs = [];
+        for (const snap of snapshots) {
+            for (const doc of snap.docs) {
+                const establishment = doc.data();
+                const lat = establishment.coordinates.lat;
+                const lng = establishment.coordinates.lng;
+
+                // We have to filter out a few false positives due to GeoHash
+                // accuracy, but most will match
+                const distanceInKm = geofire.distanceBetween([lat, lng], center);
+                const distanceInM = distanceInKm * 1000;
+                if (distanceInM <= radiusInM) {
+                    // Can add more needed info
+                    matchingDocs.push({
+                        id: doc.id,
+                        managementName: establishment.managementName,
+                        latitude: establishment.coordinates.lat,
+                        longitude: establishment.coordinates.lng,
+                    });
+                }
+            }
+        }
+        setRecommendedPlaces(matchingDocs);
+    };
+
+    const getCurrentLoc = async () => {
+        const currentLocation = await Location.getCurrentPositionAsync({});
+
+        if (currentLocation) {
+            const latitude = currentLocation.coords.latitude;
+            const longitude = currentLocation.coords.longitude;
+
+            console.log("Getting location...", latitude, longitude);
+            animate(latitude, longitude);
+            updateLoc(currentLocation);
+            setState((prevstate) => ({
+                ...prevstate,
+                current: { latitude, longitude },
+                coordinate: new AnimatedRegion({
+                    latitude: latitude,
+                    longitude: longitude,
+                    latitudeDelta: LATITUDE_DELTA,
+                    longitudeDelta: LONGITUDE_DELTA,
+                }),
+            }));
+        }
+    };
+
+    const updateLoc = async (location) => {
+        if (location) {
+            LocationStore.update((store) => {
+                store.lat = location.coords.latitude;
+                store.lng = location.coords.longitude;
+            });
+        } else {
+            console.log("Location update failed!");
+        }
+    };
+
+    const animate = (latitude, longitude) => {
+        const newCoordinate = { latitude, longitude };
+        if (markerRef.current) {
+            markerRef.current.animateMarkerToCoordinate(newCoordinate, 7000);
+        }
+    };
+
+    const handleMarkerClick = (coordinates, name) => {
+        setState((prevstate) => ({
+            ...prevstate,
+            destination: coordinates,
+        }));
+        setShowDirections(true);
+        console.log("Button clicked!", name);
+    };
+
+    return (
+        <SafeAreaView style={styles.containerStyle}>
+            <View style={styles.mapStyle}>
+                <MapView
+                    ref={mapRef}
+                    style={{ height: "100%", width: "100%" }}
+                    initialRegion={{
+                        ...current,
+                        latitudeDelta: LATITUDE_DELTA,
+                        longitudeDelta: LONGITUDE_DELTA,
+                    }}
+                >
+                    {/* User Current Location Marker */}
+                    <Marker.Animated coordinate={coordinate} title="YOU" pinColor="blue"></Marker.Animated>
+                    {/* Destination Markers */}
+                    {recommendedPlaces &&
+                        recommendedPlaces.map((place) => {
+                            return (
+                                <Marker
+                                    key={place.id}
+                                    identifier={place.id}
+                                    coordinate={{ latitude: place.latitude, longitude: place.longitude }}
+                                    title={place.managementName}
+                                    pinColor="red"
+                                    onPress={() => handleMarkerClick({ latitude: place.latitude, longitude: place.longitude }, place.managementName)}
+                                ></Marker>
+                            );
+                        })}
+                    {showDirections && (
+                        <MapViewDirections origin={current} destination={destination} apikey={API_KEY} strokeWidth={3} strokeColor="hotpink" />
+                    )}
+                </MapView>
+                <View style={styles.searchContainerStyle}>
+                    <TextInput
+                        placeholder="Search for a place"
+                        style={{
+                            width: "100%",
+                            height: 40,
+                            marginBottom: 10,
+                            borderRadius: 3,
+                            backgroundColor: "#f2f2f2",
+                            fontSize: 14,
+                            paddingHorizontal: 10,
+                        }}
+                    />
+                </View>
+            </View>
+            <Button title="Select Location" containerStyle={styles.buttonContainer} />
+            <View style={styles.menuBarStyle}>
+                <Text>Recent places</Text>
+                {recentSearches.map((search, index) => (
+                    <View key={index}>
+                        <Text>{search.name}</Text>
+                        <Text>{search.address}</Text>
+                    </View>
+                ))}
+            </View>
+        </SafeAreaView>
+    );
 };
 
 const styles = StyleSheet.create({
-  menuBarStyle: {
-    width: 240,
-    height: '100%',
-    backgroundColor: '#f2f2f2',
-    shadowColor: 'rgba(0, 0, 0, 0.3)',
-    shadowOffset: { width: 2, height: 0 },
-    shadowOpacity: 0.6,
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    padding: 16,
-  },
-  buttonContainer: {
-    position: 'absolute',
-    bottom: 20,
-    alignSelf: 'center',
-  },
+    menuBarStyle: {
+        width: 240,
+        height: "100%",
+        backgroundColor: "#f2f2f2",
+        shadowColor: "rgba(0, 0, 0, 0.3)",
+        shadowOffset: { width: 2, height: 0 },
+        shadowOpacity: 0.6,
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "space-between",
+        padding: 16,
+    },
+    buttonContainer: {
+        position: "absolute",
+        bottom: 20,
+        alignSelf: "center",
+    },
+    containerStyle: {
+        flex: 1,
+        display: "flex",
+    },
+
+    mapStyle: {
+        height: "100%",
+        width: "100%",
+    },
+    searchContainerStyle: {
+        height: 60,
+        position: "absolute",
+        top: Constants.statusBarHeight + 10,
+        left: 0,
+        right: 0,
+        justifyContent: "center",
+        alignItems: "center",
+        zIndex: 1,
+        backgroundColor: "black",
+        paddingHorizontal: 16,
+        paddingTop: 10,
+        shadowColor: "rgba(0, 0, 0, 0.3)",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.6,
+        elevation: 3,
+    },
 });
 
 export default Map;
