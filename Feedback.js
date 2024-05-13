@@ -109,11 +109,11 @@ function FeedbackScreen() {
   return (
     <View style={styles.container}>
       <Image
-        source={require('./images/wingsMoto.png')}
+          source={{ uri: 'https://i.imgur.com/WwPGlNh.png' }}
         style={styles.backgroundImage}
       />
       <Image
-        source={require('./images/backgroundWhite.png')}
+        source={{ uri: 'https://i.imgur.com/Tap1nZy.png' }}
         style={[styles.backgroundImage, { borderTopLeftRadius: 100, borderTopRightRadius: 100, marginTop: 100 }]}
       />
       <Text style={{ marginTop: 6, textAlign: 'center', fontSize: 50, fontWeight: 'bold', color: 'white' }}>Feedback</Text>

@@ -12,7 +12,7 @@ export function Start({ navigation }) {
 
     <View style={styles.container}>
       <ImageBackground
-        source={require('./images/SpotwiseLOGO.png')}
+          source={{ uri: 'https://i.imgur.com/EQcI2Ut.png' }}
         style={styles.backgroundImage}
       >
 

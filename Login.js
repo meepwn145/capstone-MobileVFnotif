@@ -65,12 +65,12 @@ export function LoginScreen() {
 
   return (
     <View style={styles.container}>
-      <Image
-      source={require('./images/wingsMoto.png')}
-      style={styles.backgroundImage}
-    />
+     <Image
+  source={{ uri: 'https://i.imgur.com/LtYGuTl.png' }}
+  style={styles.backgroundImage}
+/>
     <Image
-      source={require('./images/backgroundWhite.png')}
+     source={{ uri: 'https://i.imgur.com/Tap1nZy.png' }}
       style={[styles.backgroundImage, { borderTopLeftRadius: 130, marginTop: 100}]}
     />
     <Text style={{marginTop: 6, marginLeft: '35%', fontSize: 50, fontWeight: 'bold', color: 'white', marginVertical: 10}}>Login</Text>
@@ -111,20 +111,20 @@ export function LoginScreen() {
         <View style={styles.logoContainer}>
   <TouchableOpacity style={styles.socialButton}>
     <Image
-      source={require('./images/facebook.png')}
-      style={styles.logo}
+  source={{ uri: 'https://i.imgur.com/djoqq8E.png' }}
+        style={styles.logo}
     />
   </TouchableOpacity>
   <TouchableOpacity style={styles.socialButton}>
     <Image
-      source={require('./images/googleLogo.png')}
+      source={{ uri: 'https://i.imgur.com/RHKsn28.png' }}
       style={styles.logo2}
     />
   </TouchableOpacity>
   <TouchableOpacity style={styles.socialButton}>
     <Image
-      source={require('./images/instagram.png')}
-      style={styles.logo2}
+  source={{ uri: 'https://i.imgur.com/yx3frJ6.png' }}
+        style={styles.logo2}
     />
          
   </TouchableOpacity>

@@ -139,11 +139,11 @@ export default function Notifications() {
     <ScrollView style={styles.backgroundColorMain}> 
       <View style={styles.container}>
        <Image
-      source={require('./images/wingsMoto.png')}
+      source={{ uri: 'https://i.imgur.com/WwPGlNh.png' }}
       style={styles.backgroundImage}
     />
     <Image
-      source={require('./images/backgroundWhite.png')}
+    source={{ uri: 'https://i.imgur.com/Tap1nZy.png' }}
       style={[styles.backgroundImage, {marginTop: 100}]}
     />
     <Text style={{marginTop: 6, textAlign: 'center', fontSize: 50, fontWeight: 'bold', color: 'white', marginVertical: 10}}>Notification</Text>
@@ -178,7 +178,7 @@ export default function Notifications() {
                   style={styles.deleteButton}
                 >
                     <Image 
-                      source={require('./images/del.png')}
+                  source={{ uri: 'https://i.imgur.com/92JPGbX.png' }}
                       style={styles.deleteButtonImage}
                     />
                 </TouchableOpacity>
@@ -216,7 +216,7 @@ export default function Notifications() {
             style={styles.deleteButton}
           >
             <Image 
-              source={require('./images/del.png')}
+             source={{ uri: 'https://i.imgur.com/92JPGbX.png' }}
               style={styles.deleteButtonImage}
             />
           </TouchableOpacity>

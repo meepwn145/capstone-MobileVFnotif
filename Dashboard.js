@@ -16,12 +16,13 @@ export default function Dashboard() {
 
     const [isSidebarVisible, setSidebarVisible] = useState(false);
     const carouselImages = [
-        { image: require("./images/ayala.jpg"), text: "Ayala Mall" },
+        { image: "https://www.saifulbouquet.com/wp-content/uploads/2020/04/featured-DSC00889.jpg", text: "Ayala Mall" },
         { image: require("./images/cmall.jpg"), text: "CMall" },
         { image: require("./images/parkmall_manadaue.jpg"), text: "Parkmall Manadaue" },
         { image: require("./images/parking7.jpg"), text: "Parking 7" },
         { image: require("./images/parking5.png"), text: "Parking 5" },
     ];
+
 
     const handleCarouselCard = (text) => {
         setSidebarVisible(false);
@@ -142,7 +143,7 @@ export default function Dashboard() {
 
     return (
         <View style={styles.container}>
-            <Image source={require("./images/dashboardBACKground.png")} style={styles.backgroundImage} />
+            <Image  source={{ uri: 'https://i.imgur.com/Y6azwpB.png' }} style={styles.backgroundImage} />
 
             <View style={styles.container}>
                 <Image style={styles.navbar} />
@@ -219,22 +220,22 @@ export default function Dashboard() {
                         <TouchableWithoutFeedback onPress={handleBarsClick}>
                             <View style={styles.sidebar}>
                                 <TouchableOpacity style={styles.sidebarButton} onPress={() => handleCardClick("Feedback")}>
-                                    <Image source={require("./images/like.jpg")} style={styles.sidebarIcon} />
+                                    <Image source={{ uri: 'https://i.imgur.com/c4io4vB.jpeg' }} style={styles.sidebarIcon} />
                                     <Text style={styles.sidebarButtonText}>Feedback</Text>
                                 </TouchableOpacity>
 
                                 <TouchableOpacity style={styles.sidebarButton} onPress={() => handleCardClick("Transaction")}>
-                                    <Image source={require("./images/transaction.png")} style={styles.sidebarIcon} />
+                                    <Image   source={{ uri: 'https://i.imgur.com/MeRPAqt.png' }} style={styles.sidebarIcon} />
                                     <Text style={styles.sidebarButtonText}>Transaction</Text>
                                 </TouchableOpacity>
 
                                 <TouchableOpacity style={styles.sidebarButton} onPress={() => handleCardClick("Park")}>
-                                    <Image source={require("./images/p.png")} style={styles.sidebarIcon} />
+                                    <Image   source={{ uri: 'https://i.imgur.com/vetauvM.png' }} style={styles.sidebarIcon} />
                                     <Text style={styles.sidebarButtonText}>Parking</Text>
                                 </TouchableOpacity>
 
                                 <TouchableOpacity style={styles.sidebarButton} onPress={() => handleCardClick("Start")}>
-                                    <Image source={require("./images/logout.png")} style={styles.sidebarIcon} />
+                                    <Image   source={{ uri: 'https://i.imgur.com/YzzzEXD.png' }} style={styles.sidebarIcon} />
                                     <Text style={styles.sidebarButtonText}>Log Out</Text>
                                 </TouchableOpacity>
                             </View>

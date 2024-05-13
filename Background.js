@@ -5,7 +5,7 @@ const Background = ({ children }) => {
 
     return (
         <View>
-            <ImageBackground source={require("./images/parking2.jpg")} style ={{height: '100%'}}/>
+            <ImageBackground   source={{ uri: 'https://i.imgur.com/qw0lbQR.jpeg' }} style ={{height: '100%'}}/>
         <View>
             {children}
             </View>

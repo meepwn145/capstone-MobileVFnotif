@@ -45,18 +45,19 @@ function ParkScreen() {
     <View style={styles.container}>
       
     <Image
-    source={require('./images/wingsMoto.png')}
+  
+  source={{ uri: 'https://i.imgur.com/WwPGlNh.png' }}
     style={styles.backgroundImage}
   />
   <Image
-    source={require('./images/backgroundWhite.png')}
+     source={{ uri: 'https://i.imgur.com/Tap1nZy.png' }}
     style={[styles.backgroundImage, { borderTopLeftRadius: 130, marginTop: 100}]}
   />
 
       <Text style={styles.para}>Parking Fee: 30 PHP</Text>
       <View style={styles.imageContainer}>
   {loadingComplete && renderTimeUpButton()}
-  <Image source={require('./images/parking.gif')} style={styles.image} />
+  <Image   source={{ uri: 'https://i.imgur.com/9rK5Pk2.gif' }} style={styles.image} />
         <View 
         style={[styles.loadingLine, { width: `${loadingPercentage}%` }]} />
       </View>

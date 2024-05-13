@@ -66,7 +66,7 @@ const Map = () => {
         console.log("location", location);
         const center = [location.lat, location.lng];
         // Change this to preferred radius, 50 * 1000 is 50km
-        const radiusInM = 5 * 1000;
+        const radiusInM = 500 * 1000;
 
         // Fetch establishments order by nearest
         const bounds = geofire.geohashQueryBounds(center, radiusInM);
