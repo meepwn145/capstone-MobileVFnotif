@@ -17,7 +17,7 @@ export default function AnimatedCarScreen() {
   return (
     <View style={styles.container}>
     <Image    
-      source={{ uri: 'https://i.imgur.com/rFjanKF.gif' }}
+   
       style={styles.backgroundImage}
     />
   </View>

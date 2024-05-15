@@ -16,25 +16,25 @@ export default function Dashboard() {
 
     const [isSidebarVisible, setSidebarVisible] = useState(false);
     const carouselImages = [
-        { image: "https://www.saifulbouquet.com/wp-content/uploads/2020/04/featured-DSC00889.jpg", text: "Ayala Mall" },
-        { image: require("./images/cmall.jpg"), text: "CMall" },
-        { image: require("./images/parkmall_manadaue.jpg"), text: "Parkmall Manadaue" },
-        { image: require("./images/parking7.jpg"), text: "Parking 7" },
-        { image: require("./images/parking5.png"), text: "Parking 5" },
+        { image: { uri: 'https://www.saifulbouquet.com/wp-content/uploads/2020/04/featured-DSC00889.jpg' }, text: "Oakridge Parking Lot" },
+        { image:  { uri: 'https://media-cdn.tripadvisor.com/media/photo-s/10/08/e5/a6/mall-exterior.jpg' }, text: "Country Mall" },
+        { image:  { uri: 'https://static-ph.lamudi.com/static/media/bm9uZS9ub25l/2x2x5x880x396/b82c78f8faadef.jpg' }, text: "Crossroads Carpark" },
+        { image: { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfMENYcdscVVk9zQdRBXEnelebDd04UbZ9KW36V9wwLw&s' }, text: "Banilad Town Centre" },
+        { image:  { uri: 'https://i.pinimg.com/736x/5d/e2/c5/5de2c5ef0e446ddb39f0d090dcf2c033.jpg' }, text: "Pacific Mall" },
     ];
 
 
     const handleCarouselCard = (text) => {
         setSidebarVisible(false);
-        if (text === "Ayala Mall") {
+        if (text === "Oakridge Parking Lot") {
             navigation.navigate("Map");
-        } else if (text === "CMall") {
+        } else if (text === "Country Mall") {
             navigation.navigate("Map");
-        } else if (text === "Parkmall Manadaue") {
+        } else if (text === "Crossroads Carpark") {
             navigation.navigate("Map");
-        } else if (text === "Parking 7") {
+        } else if (text === "Banilad Town Centre") {
             navigation.navigate("Map");
-        } else if (text === "Parking 5") {
+        } else if (text === "Pacific Mall") {
             navigation.navigate("PMap");
         }
     };
