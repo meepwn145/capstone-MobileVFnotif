@@ -10,6 +10,7 @@ import { db } from "./config/firebase";
 import MapViewDirections from "react-native-maps-directions";
 import * as geofire from "geofire-common";
 import * as Location from "expo-location";
+import { useNavigation, useRoute } from "@react-navigation/native";
 
 const screen = Dimensions.get("window");
 const ASPECT_RATIO = screen.width / screen.height;
@@ -17,17 +18,18 @@ const LATITUDE_DELTA = 0.03;
 const LONGITUDE_DELTA = LATITUDE_DELTA * ASPECT_RATIO;
 const API_KEY = "AIzaSyBR5rRsw0Z-1hcxMWFz56mo4yJjlaELprg";
 
-const Map = () => {
+const Map = ({ route }) => {
+    const item = route?.params?.from || null;
     const [map, setMap] = useState(null);
     const [autocomplete, setAutocomplete] = useState(null);
-
+    const navigation = useNavigation();
     const [recentSearches, setRecentSearches] = useState([]);
     const [selectedPlace, setSelectedPlace] = useState(null);
     const [recommendedPlaces, setRecommendedPlaces] = useState([]);
     // const [destination, setDestination] = useState({});
+    const [selectedPlaceName, setSelectedPlaceName] = useState("");
     const [showDirections, setShowDirections] = useState(false);
     const location = useStoreState(LocationStore);
-
     const [state, setState] = useState({
         current: {
             latitude: location.lat,
@@ -53,6 +55,28 @@ const Map = () => {
         const savedRecentSearches = [];
         setRecentSearches(savedRecentSearches);
     }, []);
+
+    useEffect(() => {
+        if (item && recommendedPlaces.length > 0) {
+            const found = recommendedPlaces.find((place) => place.id === item.id);
+            if (!found) {
+                setRecommendedPlaces((prev) => [
+                    ...prev,
+                    {
+                        id: item.id,
+                        managementName: item.managementName,
+                        latitude: item.coordinates.lat,
+                        longitude: item.coordinates.lng,
+                    },
+                ]);
+            }
+            setState((prevstate) => ({
+                ...prevstate,
+                destination: { latitude: item.coordinates.lat, longitude: item.coordinates.lng },
+            }));
+            setShowDirections(true);
+        }
+    }, [recommendedPlaces]);
 
     // Fetch location every 5 seconds
     useEffect(() => {
@@ -151,8 +175,14 @@ const Map = () => {
             ...prevstate,
             destination: coordinates,
         }));
+        setSelectedPlaceName(name);
         setShowDirections(true);
         console.log("Button clicked!", name);
+    };
+
+    const handleSelectLocation = (managementName) => {
+        navigation.navigate("reservation", { item: { managementName: selectedPlaceName } });
+        console.log("Navigating with place:", selectedPlaceName);
     };
 
     return (
@@ -202,7 +232,7 @@ const Map = () => {
                     />
                 </View>
             </View>
-            <Button title="Select Location" containerStyle={styles.buttonContainer} />
+            <Button title="Select Location" containerStyle={styles.buttonContainer} onPress={handleSelectLocation} />
             <View style={styles.menuBarStyle}>
                 <Text>Recent places</Text>
                 {recentSearches.map((search, index) => (

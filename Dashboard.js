@@ -5,6 +5,8 @@ import { useNavigation } from "@react-navigation/native";
 import UserContext from "./UserContext";
 import { LocationStore } from "./store";
 import * as Location from "expo-location";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "./config/firebase";
 
 export default function Dashboard() {
     const navigation = useNavigation();
@@ -15,26 +17,51 @@ export default function Dashboard() {
     };
 
     const [isSidebarVisible, setSidebarVisible] = useState(false);
+    const [recommended, setRecommended] = useState([]);
     const carouselImages = [
-        { image: require("./images/ayala.jpg"), text: "Ayala Mall" },
-        { image: require("./images/cmall.jpg"), text: "CMall" },
-        { image: require("./images/parkmall_manadaue.jpg"), text: "Parkmall Manadaue" },
-        { image: require("./images/parking7.jpg"), text: "Parking 7" },
-        { image: require("./images/parking5.png"), text: "Parking 5" },
+        { image: require("./images/ayala.jpg"), text: "Oakridge Parking Lot" },
+        { image: require("./images/cmall.jpg"), text: "Country Mall" },
+        { image: require("./images/parkmall_manadaue.jpg"), text: "Crossroads Carpark" },
+        { image: require("./images/parking7.jpg"), text: "Banilad Town Centre" },
+        { image: require("./images/parking5.png"), text: "Pacific Mall" },
     ];
+
+    useEffect(() => {
+        const fetchRecommended = async () => {
+            const promises = [];
+
+            for (const c of carouselImages) {
+                const q = query(collection(db, "establishments"), where("managementName", "==", c.text));
+
+                promises.push(getDocs(q));
+            }
+
+            // Collect all the query results together into a single list
+            const snapshots = await Promise.all(promises);
+
+            const recommendations = [];
+            for (const snap of snapshots) {
+                for (const doc of snap.docs) {
+                    const establishment = doc.data();
+
+                    recommendations.push({
+                        id: doc.id,
+                        ...establishment,
+                    });
+                }
+            }
+            setRecommended(recommendations);
+        };
+
+        fetchRecommended();
+    }, []);
 
     const handleCarouselCard = (text) => {
         setSidebarVisible(false);
-        if (text === "Ayala Mall") {
-            navigation.navigate("Map");
-        } else if (text === "CMall") {
-            navigation.navigate("Map");
-        } else if (text === "Parkmall Manadaue") {
-            navigation.navigate("Map");
-        } else if (text === "Parking 7") {
-            navigation.navigate("Map");
-        } else if (text === "Parking 5") {
-            navigation.navigate("PMap");
+        for (const r of recommended) {
+            if (text === r.managementName) {
+                navigation.navigate("Map", { from: r });
+            }
         }
     };
 
