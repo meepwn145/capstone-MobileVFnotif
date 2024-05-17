@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef} from "react";
 import { View, Text, TextInput, SafeAreaView, StyleSheet, Dimensions } from "react-native";
 import MapView, { Marker, AnimatedRegion } from "react-native-maps";
 import { Button } from "react-native-elements";
@@ -10,6 +10,7 @@ import { db } from "./config/firebase";
 import MapViewDirections from "react-native-maps-directions";
 import * as geofire from "geofire-common";
 import * as Location from "expo-location";
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 const screen = Dimensions.get("window");
 const ASPECT_RATIO = screen.width / screen.height;
@@ -20,14 +21,14 @@ const API_KEY = "AIzaSyBR5rRsw0Z-1hcxMWFz56mo4yJjlaELprg";
 const Map = () => {
     const [map, setMap] = useState(null);
     const [autocomplete, setAutocomplete] = useState(null);
-
+    const navigation = useNavigation();
     const [recentSearches, setRecentSearches] = useState([]);
     const [selectedPlace, setSelectedPlace] = useState(null);
     const [recommendedPlaces, setRecommendedPlaces] = useState([]);
     // const [destination, setDestination] = useState({});
+    const [selectedPlaceName, setSelectedPlaceName] = useState("");
     const [showDirections, setShowDirections] = useState(false);
     const location = useStoreState(LocationStore);
-
     const [state, setState] = useState({
         current: {
             latitude: location.lat,
@@ -66,7 +67,7 @@ const Map = () => {
         console.log("location", location);
         const center = [location.lat, location.lng];
         // Change this to preferred radius, 50 * 1000 is 50km
-        const radiusInM = 5 * 1000;
+        const radiusInM = 100 * 1000;
 
         // Fetch establishments order by nearest
         const bounds = geofire.geohashQueryBounds(center, radiusInM);
@@ -151,8 +152,14 @@ const Map = () => {
             ...prevstate,
             destination: coordinates,
         }));
+        setSelectedPlaceName(name);
         setShowDirections(true);
         console.log("Button clicked!", name);
+    };
+
+    const handleSelectLocation = (managementName) => {
+        navigation.navigate('reservation', { item: { managementName: selectedPlaceName } });
+        console.log("Navigating with place:", selectedPlaceName);
     };
 
     return (
@@ -202,7 +209,7 @@ const Map = () => {
                     />
                 </View>
             </View>
-            <Button title="Select Location" containerStyle={styles.buttonContainer} />
+            <Button title="Select Location" containerStyle={styles.buttonContainer} onPress={handleSelectLocation}/>
             <View style={styles.menuBarStyle}>
                 <Text>Recent places</Text>
                 {recentSearches.map((search, index) => (
