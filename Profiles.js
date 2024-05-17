@@ -243,7 +243,7 @@ const Profs = () => {
         <View style={styles.container}>
           
       <Image
-      source={require('./images/profileBackV2.png')}
+       source={{ uri: 'https://i.imgur.com/zWpTvRv.png' }}
       style={styles.backgroundImage}
     />
     <View style={styles.section}>

@@ -66,11 +66,11 @@ export default function Search() {
     <View style={styles.container}>
       
       <Image
-      source={require('./images/wingsMoto.png')}
+        source={{ uri: 'https://i.imgur.com/WwPGlNh.png' }}
       style={styles.backgroundImage}
     />
     <Image
-      source={require('./images/backgroundWhite.png')}
+      source={{ uri: 'https://i.imgur.com/Tap1nZy.png' }}
       style={[styles.backgroundImage, { borderTopLeftRadius: 130, marginTop: 100}]}
     />
     <Text style={{marginTop: 6, marginLeft: '35%', fontSize: 50, fontWeight: 'bold', color: 'white', marginVertical: 10}}>Search</Text>

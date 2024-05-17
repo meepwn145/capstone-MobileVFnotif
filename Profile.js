@@ -174,8 +174,7 @@ const uploadImage = async (imageUri) => {
     <View style={styles.header}>
       <Image
         style={styles.coverPhoto}
-        source={require('./images/background.jpg')}
-      />
+        source={{ uri: 'https://i.imgur.com/0vZvm91.jpeg' }}      />
     </View>
     <View style={styles.nameWithImageContainer}>
     <TouchableOpacity onPress={pickImage}>
@@ -183,7 +182,7 @@ const uploadImage = async (imageUri) => {
 key={profileImageUrl} 
 
 style={styles.profilePicture}
-source={profileImageUrl ? { uri: `${profileImageUrl}?${new Date()}` } : require('./images/defualt.png')}
+source={profileImageUrl ? { uri: `${profileImageUrl}?${new Date()}` } : { uri: 'https://i.imgur.com/dXmMwHL.png' }}
 />
 {isEditMode && (
   <Button title="Upload Image" onPress={pickImage}/>
@@ -214,7 +213,7 @@ source={profileImageUrl ? { uri: `${profileImageUrl}?${new Date()}` } : require(
 
       
             <View style={styles.othersContainer}>
-              <Image style={styles.others} source={require('./images/address.png')} />
+              <Image style={styles.others}   source={{ uri: 'https://i.imgur.com/iLFpfAR.png' }} />
               {isEditMode ? 
                   <TextInput 
                       style={[styles.infoLabel, isEditMode && styles.editModeInput]} 
@@ -227,7 +226,7 @@ source={profileImageUrl ? { uri: `${profileImageUrl}?${new Date()}` } : require(
             </View>
 
             <View style={styles.othersContainer}>
-              <Image style={styles.others} source={require('./images/contact.png')} />
+              <Image style={styles.others} source={{ uri: 'https://i.imgur.com/4IqbYN6.png' }} />
               {isEditMode ? 
                   <TextInput 
                   style={[styles.infoLabel, isEditMode && styles.editModeInput]} 
@@ -240,7 +239,7 @@ source={profileImageUrl ? { uri: `${profileImageUrl}?${new Date()}` } : require(
             </View>
 
             <View style={styles.othersContainer}>
-              <Image style={styles.others} source={require('./images/age.png')} />
+              <Image style={styles.others}   source={{ uri: 'https://i.imgur.com/1fDmJTh.png' }}/>
               {isEditMode ? 
                   <TextInput 
                   style={[styles.infoLabel, isEditMode && styles.editModeInput]} 
@@ -253,7 +252,7 @@ source={profileImageUrl ? { uri: `${profileImageUrl}?${new Date()}` } : require(
             </View>
 
             <View style={styles.othersContainer}>
-              <Image style={styles.others} source={require('./images/gender.png')} />
+              <Image style={styles.others}  source={{ uri: 'https://i.imgur.com/cWVVVy6.png' }}/>
               {isEditMode ? 
                   <TextInput 
                   style={[styles.infoLabel, isEditMode && styles.editModeInput]} 
@@ -266,7 +265,7 @@ source={profileImageUrl ? { uri: `${profileImageUrl}?${new Date()}` } : require(
             </View>
 
             <View style={styles.othersContainer}>
-              <Image style={styles.others} source={require('./images/vehicle.png')} />
+              <Image style={styles.others}   source={{ uri: 'https://i.imgur.com/hITEseC.png' }}/>
               {isEditMode ? 
                   <TextInput 
                   style={[styles.infoLabel, isEditMode && styles.editModeInput]} 
@@ -279,7 +278,7 @@ source={profileImageUrl ? { uri: `${profileImageUrl}?${new Date()}` } : require(
             </View>
 
             <View style={styles.othersContainer}>
-              <Image style={styles.others} source={require('./images/plate.png')} />
+              <Image style={styles.others}  source={{ uri: 'https://i.imgur.com/Cjz3H88.png' }} />
               {isEditMode ? 
                   <TextInput 
                   style={[styles.infoLabel, isEditMode && styles.editModeInput]} 

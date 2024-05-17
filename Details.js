@@ -7,13 +7,10 @@ export default function DetailsScreen({ route }) {
     const { item } = route.params;
     const navigation = useNavigation();
 
-    return (
-        <View style={styles.container}>
-            <Image source={require("./images/wingsMoto.png")} style={styles.backgroundImage} />
-            <Image
-                source={require("./images/backgroundWhite.png")}
-                style={[styles.backgroundImage, { borderTopLeftRadius: 80, marginTop: 100, borderTopRightRadius: 80 }]}
-            />
+  return (
+    <View style={styles.container}>
+      <Image   source={{ uri: 'https://i.imgur.com/WwPGlNh.png' }} style={styles.backgroundImage} />
+      <Image source={{ uri: 'https://i.imgur.com/Tap1nZy.png' }} style={[styles.backgroundImage, { borderTopLeftRadius: 80, marginTop: 100, borderTopRightRadius: 80 }]} />
 
             <Text style={styles.titleText}>Details</Text>
 

@@ -24,8 +24,8 @@ export default function PaymentMethodPage() {
       >
         <View style={styles.logoContainer}>
           <Image
-            source={require('./images/gcash.png')}
-            style={styles.logo}
+             source={{ uri: 'https://i.imgur.com/hLMbgxO.png' }}
+              style={styles.logo}
           />
         </View>
         <Text style={styles.optionText}>Gcash</Text>
@@ -36,7 +36,7 @@ export default function PaymentMethodPage() {
       >
         <View style={styles.logoContainer}>
           <Image
-            source={require('./images/paypal.png')}
+            source={{ uri: 'https://i.imgur.com/F6MiHU2.png' }}
             style={styles.logo}
           />
         </View>

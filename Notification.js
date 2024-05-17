@@ -96,61 +96,47 @@ export default function Notifications() {
   return (
     <ScrollView style={styles.backgroundColorMain}>
       <View style={styles.container}>
-        <Image
-          source={require('./images/wingsMoto.png')}
-          style={styles.backgroundImage}
-        />
-        <Image
-          source={require('./images/backgroundWhite.png')}
-          style={[styles.backgroundImage, { marginTop: 100 }]}
-        />
-        <Text style={{ marginTop: 6, textAlign: 'center', fontSize: 50, fontWeight: 'bold', color: 'white', marginVertical: 10 }}>Notification</Text>
-        <View style={styles.formContainer}></View>
+       <Image
+      source={{ uri: 'https://i.imgur.com/WwPGlNh.png' }}
+      style={styles.backgroundImage}
+    />
+    <Image
+    source={{ uri: 'https://i.imgur.com/Tap1nZy.png' }}
+      style={[styles.backgroundImage, {marginTop: 100}]}
+    />
+    <Text style={{marginTop: 6, textAlign: 'center', fontSize: 50, fontWeight: 'bold', color: 'white', marginVertical: 10}}>Notification</Text>
+    <View style={styles.formContainer}></View>
 
-        <View style={styles.content}>
-          {resStatusLogs.length > 0 ? (
-            resStatusLogs.map((log) => (
-              <TouchableOpacity
-                key={log.id}
-                style={styles.notification}
-                onPress={() => toggleSelection(log.id)}
-              >
-                <Text style={styles.notificationHeader1}>
-                  Parked/Reserved at: {log.managementName}
-                </Text>
-                <Text style={styles.notificationText}>
-                  Payment Status: {log.paymentStatus}
-                </Text>
-                <Text style={styles.notificationText}>
-                  Slot Number: {log.slotId}
-                </Text>
-                <Text style={styles.notificationText}>
-                  Duration: {formatDuration(log.timeIn, log.timeOut)}
-                </Text>
-                <Text style={styles.notificationDate}>
-                  Date: {new Date(log.timestamp.seconds * 1000).toLocaleDateString()}
-                  {'\ '} {log.timeIn ? new Date(log.timeIn.seconds * 1000).toLocaleTimeString() : 'N/A'} {'\ '}
-                  {log.timeOut ? new Date(log.timeOut.seconds * 1000).toLocaleTimeString() : 'N/A'}
-                </Text>
-                <Text style={styles.notificationText}>
-                  Floor Title: {log.floorTitle}
-                </Text>
-                <Text style={styles.notificationText}>
-                  Reservation Status: {log.resStatus}
-                </Text>
-                <Text style={styles.notificationText}>
-                  Status: {log.status}
-                </Text>
-                <Text style={styles.notificationText}>
-                  Username: {log.userName}
-                </Text>
-                {selectedId === log.id && (
-                  <TouchableOpacity
-                    onPress={() => deleteNotification(log.id)}
-                    style={styles.deleteButton}
-                  >
-                    <Image
-                      source={require('./images/del.png')}
+   
+      <View style={styles.content}>
+        {parkingLogs.length > 0 ? (
+          parkingLogs.map((log) => (
+            <TouchableOpacity
+              key={log.id}
+              style={styles.notification}
+              onPress={() => toggleSelection(log.id)}
+            >
+              <Text style={styles.notificationHeader1}>
+                Parked at: {log.managementName}
+              </Text>
+              <Text style={styles.notificationText}>
+                Payment Status: {log.paymentStatus}
+              </Text>
+              <Text style={styles.notificationText}>
+                Duration: {formatDuration(log.timeIn, log.timeOut)}
+              </Text>
+              <Text style={styles.notificationDate}>
+                Date: {new Date(log.timestamp.seconds * 1000).toLocaleDateString()} 
+                {'\ '} {log.timeIn ? new Date(log.timeIn.seconds * 1000).toLocaleTimeString() : 'N/A'} {'\ '}
+                {log.timeOut ? new Date(log.timeOut.seconds * 1000).toLocaleTimeString() : 'N/A'}
+              </Text>
+              {selectedId === log.id && (
+                <TouchableOpacity
+                  onPress={() => deleteNotification(log.id)}
+                  style={styles.deleteButton}
+                >
+                    <Image 
+                  source={{ uri: 'https://i.imgur.com/92JPGbX.png' }}
                       style={styles.deleteButtonImage}
                     />
                   </TouchableOpacity>

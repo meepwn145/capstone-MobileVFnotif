@@ -51,7 +51,7 @@ export function SignupScreen() {
   return (
     <View style={{backgroundColor: 'white'}}>
     <Image
-    source={require('./images/wingsMoto.png')}
+      source={{ uri: 'https://i.imgur.com/WwPGlNh.png' }}
     style={styles.backgroundImage}
   />
     <Text style={styles.title}>Register</Text>

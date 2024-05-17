@@ -16,8 +16,8 @@ export default function AnimatedCarScreen() {
 
   return (
     <View style={styles.container}>
-    <Image
-      source={require('./images/spotWiseLogoV4.gif')}
+    <Image    
+   
       style={styles.backgroundImage}
     />
   </View>

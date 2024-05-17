@@ -11,12 +11,13 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true
     },
     "android": {
-      "allowFontScaling": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -28,7 +29,7 @@
     },
     "extra": {
       "eas": {
-        "projectId": "02d6c6c8-5961-49e9-9615-949f81cc2448"
+        "projectId": "36db4fe9-ff64-4af5-9c70-15d0cbbca260"
       }
     }
   }
