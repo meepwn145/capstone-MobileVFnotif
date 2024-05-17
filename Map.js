@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef} from "react";
 import { View, Text, TextInput, SafeAreaView, StyleSheet, Dimensions } from "react-native";
 import MapView, { Marker, AnimatedRegion } from "react-native-maps";
 import { Button } from "react-native-elements";
@@ -90,7 +90,7 @@ const Map = ({ route }) => {
         console.log("location", location);
         const center = [location.lat, location.lng];
         // Change this to preferred radius, 50 * 1000 is 50km
-        const radiusInM = 5 * 1000;
+        const radiusInM = 100 * 1000;
 
         // Fetch establishments order by nearest
         const bounds = geofire.geohashQueryBounds(center, radiusInM);

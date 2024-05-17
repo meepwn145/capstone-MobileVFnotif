@@ -1,18 +1,17 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
-import { getFirestore, collection, query, where, orderBy, limit, onSnapshot, deleteDoc, doc} from 'firebase/firestore';
+import { getFirestore, collection, query, where, orderBy, onSnapshot, deleteDoc, doc } from 'firebase/firestore';
 import { db, auth } from './config/firebase';
 import { Button } from 'react-native-elements';
-
 
 export default function Notifications() {
   const navigation = useNavigation();
   const [loading, setLoading] = useState(true);
-  const [parkingLogs, setParkingLogs] = useState([]);
-  const [reserveLogs, setReserveLogs] = useState([]);
+  const [resStatusLogs, setResStatusLogs] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
+
   const toggleSelection = (id) => {
     setSelectedId(selectedId === id ? null : id); // Toggle selection
   };
@@ -20,10 +19,12 @@ export default function Notifications() {
   useEffect(() => {
     const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
       if (user) {
-        const userID = user.email;
-        // Construct the query for all parking logs for the user
-        const q = query(collection(db, 'logs'), where('email', '==', userID), orderBy('timestamp', 'desc'));
-  
+        console.log('User:', user); // Add this line
+        const userID = user.name;
+
+        // Construct the query for all resStatus logs for the user
+        const q = query(collection(db, 'resStatus'), where('userName', '==', userID), orderBy('timestamp', 'desc'));
+
         const unsubscribeLogs = onSnapshot(q, (snapshot) => {
           if (!snapshot.empty) {
             const logs = snapshot.docs.map(doc => {
@@ -32,67 +33,36 @@ export default function Notifications() {
                 id: doc.id,
                 managementName: data.managementName,
                 paymentStatus: data.paymentStatus,
-                timestamp: data.timestamp, 
+                timestamp: data.timestamp,
                 timeIn: data.timeIn,
                 timeOut: data.timeOut,
-              };
-            });
-            setParkingLogs(logs);
-          } else {
-            setParkingLogs([]);
-          }
-          setLoading(false);
-        }, (err) => {
-          console.error(`Encountered error: ${err}`);
-          setLoading(false);
-        });
-  
-        return () => unsubscribeLogs();
-      } else {
-        setLoading(false);
-      }
-    });
-  
-    return () => unsubscribeAuth();
-  }, []);
-
-  useEffect(() => {
-    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        const userID = user.email;
-        // Construct the query for all parking logs for the user
-        const q = query(collection(db, 'reservations'), where('email', '==', userID), orderBy('timestamp', 'desc'));
-  
-        const unsubscribeLogs = onSnapshot(q, (snapshot) => {
-          if (!snapshot.empty) {
-            const logs = snapshot.docs.map(doc => {
-              const data = doc.data();
-              return {
-                id: doc.id,
-                managementName: data.managementName, 
-                timestamp: data.timestamp, 
                 slotId: data.slotId,
+                carPlateNumber: data.carPlateNumber,
+                floorTitle: data.floorTitle,
+                resStatus: data.resStatus,
+                status: data.status,
+                userName: data.userName,
               };
             });
-            setReserveLogs(logs);
+            setResStatusLogs(logs);
           } else {
-            setReserveLogs([]);
+            setResStatusLogs([]);
           }
           setLoading(false);
         }, (err) => {
           console.error(`Encountered error: ${err}`);
           setLoading(false);
         });
-  
+
         return () => unsubscribeLogs();
       } else {
+        console.error('User is not authenticated.');
         setLoading(false);
       }
     });
-  
+
     return () => unsubscribeAuth();
   }, []);
-
 
   if (loading) {
     return <View style={styles.container}><Text>Loading...</Text></View>;
@@ -100,33 +70,23 @@ export default function Notifications() {
 
   const formatDuration = (timeIn, timeOut) => {
     if (!timeIn || !timeOut) return 'N/A';
-  
+
     const start = new Date(timeIn.seconds * 1000);
     const end = new Date(timeOut.seconds * 1000);
     const duration = end - start;
-  
+
     // Convert milliseconds to minutes
     const minutes = Math.floor(duration / 60000);
     const hours = Math.floor(minutes / 60);
     const remainingMinutes = minutes % 60;
-  
+
     return `${hours}h ${remainingMinutes}m`;
   };
 
   const deleteNotification = async (id) => {
     try {
       // Delete the notification from the database
-      await deleteDoc(doc(db, 'logs', id));
-      console.log('Notification deleted successfully');
-    } catch (error) {
-      console.error('Error deleting notification:', error);
-    }
-  };
-
-  const deleteNotification2 = async (id) => {
-    try {
-      // Delete the notification from the database
-      await deleteDoc(doc(db, 'reservations', id));
+      await deleteDoc(doc(db, 'resStatus', id));
       console.log('Notification deleted successfully');
     } catch (error) {
       console.error('Error deleting notification:', error);
@@ -134,115 +94,86 @@ export default function Notifications() {
   };
 
   return (
-   
-    
-    <ScrollView style={styles.backgroundColorMain}> 
+    <ScrollView style={styles.backgroundColorMain}>
       <View style={styles.container}>
-       <Image
-      source={require('./images/wingsMoto.png')}
-      style={styles.backgroundImage}
-    />
-    <Image
-      source={require('./images/backgroundWhite.png')}
-      style={[styles.backgroundImage, {marginTop: 100}]}
-    />
-    <Text style={{marginTop: 6, textAlign: 'center', fontSize: 50, fontWeight: 'bold', color: 'white', marginVertical: 10}}>Notification</Text>
-    <View style={styles.formContainer}></View>
+        <Image
+          source={require('./images/wingsMoto.png')}
+          style={styles.backgroundImage}
+        />
+        <Image
+          source={require('./images/backgroundWhite.png')}
+          style={[styles.backgroundImage, { marginTop: 100 }]}
+        />
+        <Text style={{ marginTop: 6, textAlign: 'center', fontSize: 50, fontWeight: 'bold', color: 'white', marginVertical: 10 }}>Notification</Text>
+        <View style={styles.formContainer}></View>
 
-   
-      <View style={styles.content}>
-        {parkingLogs.length > 0 ? (
-          parkingLogs.map((log) => (
-            <TouchableOpacity
-              key={log.id}
-              style={styles.notification}
-              onPress={() => toggleSelection(log.id)}
-            >
-              <Text style={styles.notificationHeader1}>
-                Parked at: {log.managementName}
-              </Text>
-              <Text style={styles.notificationText}>
-                Payment Status: {log.paymentStatus}
-              </Text>
-              <Text style={styles.notificationText}>
-                Duration: {formatDuration(log.timeIn, log.timeOut)}
-              </Text>
-              <Text style={styles.notificationDate}>
-                Date: {new Date(log.timestamp.seconds * 1000).toLocaleDateString()} 
-                {'\ '} {log.timeIn ? new Date(log.timeIn.seconds * 1000).toLocaleTimeString() : 'N/A'} {'\ '}
-                {log.timeOut ? new Date(log.timeOut.seconds * 1000).toLocaleTimeString() : 'N/A'}
-              </Text>
-              {selectedId === log.id && (
-                <TouchableOpacity
-                  onPress={() => deleteNotification(log.id)}
-                  style={styles.deleteButton}
-                >
-                    <Image 
+        <View style={styles.content}>
+          {resStatusLogs.length > 0 ? (
+            resStatusLogs.map((log) => (
+              <TouchableOpacity
+                key={log.id}
+                style={styles.notification}
+                onPress={() => toggleSelection(log.id)}
+              >
+                <Text style={styles.notificationHeader1}>
+                  Parked/Reserved at: {log.managementName}
+                </Text>
+                <Text style={styles.notificationText}>
+                  Payment Status: {log.paymentStatus}
+                </Text>
+                <Text style={styles.notificationText}>
+                  Slot Number: {log.slotId}
+                </Text>
+                <Text style={styles.notificationText}>
+                  Duration: {formatDuration(log.timeIn, log.timeOut)}
+                </Text>
+                <Text style={styles.notificationDate}>
+                  Date: {new Date(log.timestamp.seconds * 1000).toLocaleDateString()}
+                  {'\ '} {log.timeIn ? new Date(log.timeIn.seconds * 1000).toLocaleTimeString() : 'N/A'} {'\ '}
+                  {log.timeOut ? new Date(log.timeOut.seconds * 1000).toLocaleTimeString() : 'N/A'}
+                </Text>
+                <Text style={styles.notificationText}>
+                  Floor Title: {log.floorTitle}
+                </Text>
+                <Text style={styles.notificationText}>
+                  Reservation Status: {log.resStatus}
+                </Text>
+                <Text style={styles.notificationText}>
+                  Status: {log.status}
+                </Text>
+                <Text style={styles.notificationText}>
+                  Username: {log.userName}
+                </Text>
+                {selectedId === log.id && (
+                  <TouchableOpacity
+                    onPress={() => deleteNotification(log.id)}
+                    style={styles.deleteButton}
+                  >
+                    <Image
                       source={require('./images/del.png')}
                       style={styles.deleteButtonImage}
                     />
-                </TouchableOpacity>
-              )}
-            </TouchableOpacity>
-          ))
-        ) : (
-          <Text style={[styles.notificationText, { textAlign: 'center' }]}>No new reservation notification</Text>
-        )}
-        
-      </View>
-
-      <View style={styles.content}>
-  {reserveLogs.length > 0 ? (
-    reserveLogs.map((log) => (
-      <TouchableOpacity
-        key={log.id}
-        style={[styles.notification, selectedId === log.id && styles.selectedNotification]}
-        onPress={() => toggleSelection(log.id)}
-      >
-        <View style={styles.notificationInfo}>
-          <Text style={styles.notificationText}>
-            Reserved at: {log.managementName}
-          </Text>
-          <Text style={styles.notificationText}>
-            Slot Number: {log.slotId}
-          </Text>
-          <Text style={styles.notificationDate}>
-            Date: {new Date(log.timestamp.seconds * 1000).toLocaleDateString()} 
-          </Text>
+                  </TouchableOpacity>
+                )}
+              </TouchableOpacity>
+            ))
+          ) : (
+            <Text style={[styles.notificationText, { textAlign: 'center' }]}>No new reservation notification</Text>
+          )}
         </View>
-        {selectedId === log.id && (
-          <TouchableOpacity
-            onPress={() => deleteNotification2(log.id)}
-            style={styles.deleteButton}
-          >
-            <Image 
-              source={require('./images/del.png')}
-              style={styles.deleteButtonImage}
-            />
-          </TouchableOpacity>
-        )}
-      </TouchableOpacity>
-    ))
-  ) : (
-    <Text style={styles.notificationText}>No new reservation notification</Text>
-  )}
-</View>
 
-      <View>
-      <TouchableOpacity onPress={() => navigation.navigate('Dashboard')} style={styles.buttonBack}>
-        <Text style={styles.buttonTextBack}>Back</Text>
-      </TouchableOpacity>
-      </View>
+        <View>
+          <TouchableOpacity onPress={() => navigation.navigate('Dashboard')} style={styles.buttonBack}>
+            <Text style={styles.buttonTextBack}>Back</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </ScrollView>
-
-
   );
 }
 
-
 const styles = StyleSheet.create({
-  backgroundColorMain:{
+  backgroundColorMain: {
     backgroundColor: 'white',
   },
   container: {
@@ -270,26 +201,24 @@ const styles = StyleSheet.create({
     alignItems: 'center', // Center horizontally
     backgroundColor: '#fff', // or any other color for non-clicked notification
   },
-  notificationHeader1:{
+  notificationHeader1: {
     fontSize: 16,
     padding: 10,
     fontWeight: 'bold',
-
   },
   notificationText: {
     fontSize: 16,
     padding: 10,
-    },
-    
-    notificationTextHeader: {
-      fontSize: 16,
-      padding: 10,
-      textAlign: 'center',
-      },
+  },
+  notificationTextHeader: {
+    fontSize: 16,
+    padding: 10,
+    textAlign: 'center',
+  },
   notificationDate: {
     fontSize: 14,
     padding: 10,
-    color: 'gray', 
+    color: 'gray',
   },
   buttonBack: {
     borderColor: '#87CEEB',
@@ -303,7 +232,6 @@ const styles = StyleSheet.create({
     width: '90%',
     alignSelf: 'center',
   },
-
   buttonTextBack: {
     color: '#87CEEB',
     fontSize: 16,
@@ -315,26 +243,25 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   notificationClicked: {
-    backgroundColor: 'gray', 
+    backgroundColor: 'gray',
   },
   deleteButton: {
     position: 'absolute',
     top: 120,
     right: 10,
-    
     paddingVertical: 8,
     paddingHorizontal: 12,
     borderRadius: 5,
   },
   deleteButtonImage: {
-    width: 30, 
+    width: 30,
     height: 30,
-    resizeMode: 'contain', 
+    resizeMode: 'contain',
   },
   backgroundImage: {
-    ...StyleSheet.absoluteFillObject, 
+    ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
-    resizeMode: 'cover' 
+    resizeMode: 'cover',
   },
 });
