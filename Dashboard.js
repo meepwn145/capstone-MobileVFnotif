@@ -25,7 +25,35 @@ export default function Dashboard() {
         { image: { uri: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSfMENYcdscVVk9zQdRBXEnelebDd04UbZ9KW36V9wwLw&s' }, text: "Banilad Town Centre" },
         { image:  { uri: 'https://i.pinimg.com/736x/5d/e2/c5/5de2c5ef0e446ddb39f0d090dcf2c033.jpg' }, text: "Pacific Mall" },
     ];
+    useEffect(() => {
+        const fetchRecommended = async () => {
+            const promises = [];
 
+            for (const c of carouselImages) {
+                const q = query(collection(db, "establishments"), where("managementName", "==", c.text));
+
+                promises.push(getDocs(q));
+            }
+
+            // Collect all the query results together into a single list
+            const snapshots = await Promise.all(promises);
+
+            const recommendations = [];
+            for (const snap of snapshots) {
+                for (const doc of snap.docs) {
+                    const establishment = doc.data();
+
+                    recommendations.push({
+                        id: doc.id,
+                        ...establishment,
+                    });
+                }
+            }
+            setRecommended(recommendations);
+        };
+
+        fetchRecommended();
+    }, []);
 
     const handleCarouselCard = (text) => {
         setSidebarVisible(false);
@@ -56,7 +84,7 @@ export default function Dashboard() {
                     animated: true,
                 });
             }
-        }, 1000);
+        }, 2000);
 
         return () => clearInterval(scrollInterval.current);
     }, []);
@@ -297,6 +325,8 @@ const styles = StyleSheet.create({
         borderWidth: 2,
         borderColor: "#FFD700",
         position: "relative",
+        backgroundColor: "white", // Ensure background color
+
     },
     carouselImage: {
         width: "100%",
@@ -305,11 +335,14 @@ const styles = StyleSheet.create({
     },
     carouselText: {
         position: "absolute",
-        bottom: 10, // Adjust this value as needed to position the text
-        left: 10, // Adjust this value as needed to position the text
+        bottom: 10,
+        left: 10,
         color: "white",
         fontSize: 20,
         fontWeight: "bold",
+        backgroundColor: "rgba(0, 0, 0, 0.5)", // Optional for better visibility
+        padding: 5,  // Optional for better visibility
+        zIndex: 1,  // Ensure this is higher than the image
     },
     tabBarContainer: {
         marginTop: "60%",

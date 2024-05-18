@@ -379,6 +379,7 @@ export default function ReservationScreen({ route }) {
                   managementName: item.managementName,
                   timestamp: new Date(),
                   status: 'Reserved',
+                  currentLocation: location,
                   floorTitle,
                 };
   
