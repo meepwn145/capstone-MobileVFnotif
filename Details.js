@@ -1,28 +1,64 @@
-import React from "react";
-import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native"; // Added Image import
+import React, { useState, useEffect } from "react";
+import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Card } from "react-native-elements";
+import { collection, getDocs, query, where } from "firebase/firestore";
+import { db } from "./config/firebase";
 
 export default function DetailsScreen({ route }) {
     const { item } = route.params;
     const navigation = useNavigation();
 
-  return (
-    <View style={styles.container}>
-      <Image   source={{ uri: 'https://i.imgur.com/WwPGlNh.png' }} style={styles.backgroundImage} />
-      <Image source={{ uri: 'https://i.imgur.com/Tap1nZy.png' }} style={[styles.backgroundImage, { borderTopLeftRadius: 80, marginTop: 100, borderTopRightRadius: 80 }]} />
+    // State to store the available parking slots
+    const [availableSlots, setAvailableSlots] = useState(0);
 
+    const fetchParkingSlots = async (managementName) => {
+        try {
+            const establishmentQuery = query(collection(db, "establishments"), where("managementName", "==", managementName));
+            const establishmentSnapshot = await getDocs(establishmentQuery);
+            if (establishmentSnapshot.empty) {
+                console.log("No matching establishments found.");
+                return { totalSlots: 0, availableSlots: 0 };
+            }
+
+            let totalSlots = 0;
+            establishmentSnapshot.forEach(doc => {
+                totalSlots = doc.data().totalSlots;
+            });
+
+            const slotDataQuery = query(collection(db, `slot/${managementName}/slotData`));
+            const slotDataSnapshot = await getDocs(slotDataQuery);
+            const occupiedSlots = slotDataSnapshot.size;
+
+            const available = totalSlots - occupiedSlots;
+            setAvailableSlots(available);  // Update the state with the available slots
+        } catch (error) {
+            console.error("Error fetching parking data: ", error);
+            setAvailableSlots(0);  // Set available slots to 0 in case of an error
+        }
+    };
+
+    // Fetch available slots when the component mounts or item changes
+    useEffect(() => {
+        if (item && item.managementName) {
+            fetchParkingSlots(item.managementName);
+        }
+    }, [item]);
+
+    return (
+        <View style={styles.container}>
+            <Image source={{ uri: 'https://i.imgur.com/WwPGlNh.png' }} style={styles.backgroundImage} />
+            <Image source={{ uri: 'https://i.imgur.com/Tap1nZy.png' }} style={[styles.backgroundImage, { borderTopLeftRadius: 80, marginTop: 100, borderTopRightRadius: 80 }]} />
             <Text style={styles.titleText}>Details</Text>
 
             <Card containerStyle={styles.cardContainer}>
                 <View>
                     <Text style={styles.headerName}>{item.managementName}</Text>
-                    <Image source={{ uri: item.imageUrl }} style={styles.image} />
-                    <Text style={styles.para1}>Operation</Text>
-                    <Text style={styles.para1}>Open Now: 10:00AM - 11:30PM</Text>
+                    <Image source={{ uri: item.profileImageUrl }} style={styles.image} />
+                    <Text style={styles.para1}>Open at: {item.openTime} A.M until {item.closeTime} P.M</Text>
                     <Text style={styles.para}>Located at</Text>
                     <Text style={styles.address}>{item.companyAddress}</Text>
-                    <Text style={styles.para}>Available Parking Space: {item.totalSlots}</Text>
+                    <Text style={styles.available}>Available Parking Space: {availableSlots}</Text>
                 </View>
             </Card>
 
@@ -36,6 +72,7 @@ export default function DetailsScreen({ route }) {
         </View>
     );
 }
+
 
 const styles = StyleSheet.create({
     container: {
@@ -52,14 +89,23 @@ const styles = StyleSheet.create({
         fontSize: 14,
         marginTop: 10,
         color: "gray",
+        fontFamily: 'Copperplate',
     },
     para: {
         fontSize: 14,
         marginTop: 10,
+        fontFamily: 'Copperplate',
+    },
+    available: {
+        fontSize: 14,
+        marginTop: 10,
+        fontFamily: 'Copperplate',
+        color: 'green',
     },
     address: {
         color: "gray",
         fontSize: 15,
+        fontFamily: 'Copperplate',
     },
     image: {
         width: 200,

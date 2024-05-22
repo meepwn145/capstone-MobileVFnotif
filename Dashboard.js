@@ -90,7 +90,7 @@ export default function Dashboard() {
     }, []);
 
     const handleViewRecentParked = () => {
-        navigation.navigate("Search");
+        navigation.navigate("Map");
     };
 
     const onViewableItemsChanged = useRef(({ viewableItems }) => {
@@ -202,8 +202,8 @@ export default function Dashboard() {
                             </View>
                             <View style={{ flex: 1.5, paddingTop: "25.5%" }}>
                                 <View style={{ backgroundColor: "white", opacity: 0.8, padding: "6%", borderBottomRightRadius: 20 }}>
-                                    <Text style={{ fontSize: 18, fontWeight: "bold" }}>AyalaMall Cebu Center</Text>
-                                    <Text style={{ fontSize: 14, color: "#888" }}>Last updated 3 mins ago</Text>
+                                    <Text style={{ fontSize: 18, fontWeight: "bold" }}>Explore</Text>
+                                    <Text style={{ fontSize: 14, color: "#888" }}>more nearby parking spaces</Text>
                                     <TouchableOpacity
                                         onPress={handleViewRecentParked}
                                         style={{ marginTop: 13.4, backgroundColor: "#FFD700", padding: 1, borderRadius: 2 }}
@@ -416,4 +416,5 @@ const styles = StyleSheet.create({
         resizeMode: "cover",
         borderRadius: 10,
     },
+   
 });

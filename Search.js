@@ -51,7 +51,7 @@ export default function Search() {
   const renderItem = ({ item }) => (
     <TouchableOpacity onPress={() => handleItemClick(item)}>
       <View style={styles.item}>
-        <Image source={{ uri: item.imageUrl }} style={styles.itemImage} />
+        <Image source={{ uri: item.profileImageUrl }} style={styles.itemImage} />
         <View style={{flex:1}}>
         <Text style={styles.itemName}>{item.companyAddress}</Text>
         </View>

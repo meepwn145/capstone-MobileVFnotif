@@ -486,7 +486,8 @@ export default function ReservationScreen({ route }) {
     return (
         <View style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <Image source={require("./images/wingsMoto.png")} style={styles.backgroundImage} />
+            <Image   source={{ uri: 'https://i.imgur.com/WwPGlNh.png' }} style={styles.backgroundImage} />
+            <Image source={{ uri: 'https://i.imgur.com/Tap1nZy.png' }} style={[styles.backgroundImage, { borderTopLeftRadius: 80, marginTop: 100, borderTopRightRadius: 80 }]} />
                 <Image
                     source={require("./images/backgroundWhite.png")}
                     style={[styles.backgroundImage, { borderTopLeftRadius: 130, marginTop: 100 }]}
@@ -636,6 +637,8 @@ const styles = StyleSheet.create({
         fontSize: 18,
         fontWeight: "bold",
         marginBottom: 10,
+        textAlign: 'center',
+        marginTop: 50
     },
     slotContainer: {
         flexDirection: "row",
