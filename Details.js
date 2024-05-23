@@ -58,6 +58,7 @@ export default function DetailsScreen({ route }) {
                     <Text style={styles.para1}>Open at: {item.openTime} A.M until {item.closeTime} P.M</Text>
                     <Text style={styles.para}>Located at</Text>
                     <Text style={styles.address}>{item.companyAddress}</Text>
+                    <Text style={styles.address}>Parking Pay: {item.parkingPay}.00</Text>
                     <Text style={styles.available}>Available Parking Space: {availableSlots}</Text>
                 </View>
             </Card>

@@ -1,31 +1,39 @@
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
 admin.initializeApp();
 
-exports.sendNotificationOnReservationStatusChange = functions.firestore
-    .document('reservations/{reservationId}')
-    .onUpdate((change, context) => {
-        const newValue = change.after.data();
-        const previousValue = change.before.data();
+exports.sendPushNotification = functions.firestore
+  .document('reservations/{reservationId}')
+  .onCreate(async (snapshot, context) => {
+    const reservationData = snapshot.data();
 
-        if (newValue.status !== previousValue.status) {
-            const payload = {
-                notification: {
-                    title: `Reservation ${newValue.status}`,
-                    body: `Your reservation has been ${newValue.status.toLowerCase()}`,
-                }
-            };
+    // Get the user associated with the reservation
+    const userRef = admin.firestore().doc(`users/${reservationData.userEmail}`);
+    const userSnap = await userRef.get();
+    const user = userSnap.data();
 
-            const topic = newValue.userUid; // Use the UID as the topic name
-            return admin.messaging().sendToTopic(topic, payload)
-                .then(response => {
-                    console.log('Notification sent successfully:', response);
-                    return null;
-                })
-                .catch(error => {
-                    console.error('Error sending notification:', error);
-                });
-        } else {
-            return null;
-        }
-    });
+    // Check if the user has a token
+    if (user.expoPushToken) {
+      const message = {
+        to: user.expoPushToken,
+        sound: 'default',
+        title: 'New Reservation',
+        body: `Your reservation for slot ${reservationData.slotId} is confirmed!`,
+        data: { reservationData },
+      };
+
+      // Use fetch to send the notification
+      const response = await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(message),
+      });
+
+      return response.json();
+    } else {
+      console.log('No token for user, cannot send notification');
+    }
+  });

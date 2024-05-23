@@ -33,6 +33,7 @@ export default function ReservationScreen({ route }) {
     const [reservationManagement, setReservationManagement] = useState('');
     const [managementPrice, setManagementPrice] = useState (0);
     const [alertShown, setAlertShown] = useState(false); 
+    const [fee, setFee] = useState('');
 
     useEffect(() => {
         const reservationsRef = collection(db, "reservations");
@@ -153,6 +154,7 @@ export default function ReservationScreen({ route }) {
                     const establishmentData = snapshot.docs[0].data();
                     console.log("Establishment data:", establishmentData);
                     setSlotSets(processEstablishmentData(establishmentData));
+                    setFee (establishmentData.parkingPay);
                 } else {
                     console.log("Establishment data not found");
                 }
@@ -239,40 +241,47 @@ export default function ReservationScreen({ route }) {
     };
 
     const reserveSlot = (slotNumber) => {
-        if (reservedSlots.includes(slotNumber)) {
-            Alert.alert(
-                "Confirmation",
-                `Are you sure you want to cancel the reservation for Slot ${slotNumber}?`,
-                [
-                    {
-                        text: "Cancel",
-                        style: "cancel",
-                    },
-                    {
-                        text: "OK",
-                        onPress: () => {
-                            setReservedSlots((prevSlots) => prevSlots.filter((slot) => slot !== slotNumber));
-                            setSelectedSlot();
-                            Alert.alert("Reservation Canceled", `Reservation for Slot ${slotNumber} canceled successfully!`);
-                        },
-                    },
-                ],
-                { cancelable: false }
-            );
-        } else {
-            // Check if the user has already reserved a slot
-            if (reservedSlots.length > 0) {
-                Alert.alert("Reservation Limit", "You can only reserve one slot at a time.", [
-                    {
-                        text: "OK",
-                        style: "default",
-                    },
-                ]);
-            } else {
-                setSelectedSlot(slotNumber);
-            }
-        }
-    };
+      const slotInfo = { slotNumber, managementName: item.managementName, parkingPay: item.parkingPay };
+  
+      // Check if the slot is already reserved and if it's in the same management
+      const existingSlot = reservedSlots.find(slot => slot.slotNumber === slotNumber && slot.managementName === item.managementName && slot.parkingPay === item.parkingPay);
+  
+      if (existingSlot) {
+          Alert.alert(
+              "Confirmation",
+              `Are you sure you want to cancel the reservation for Slot ${slotNumber} at ${item.managementName}?`,
+              [
+                  {
+                      text: "Cancel",
+                      style: "cancel",
+                  },
+                  {
+                      text: "OK",
+                      onPress: () => {
+                          setReservedSlots((prevSlots) => prevSlots.filter((slot) => slot.slotNumber !== slotNumber || slot.managementName !== item.managementName));
+                          setSelectedSlot(null);
+                          Alert.alert("Reservation Canceled", `Reservation for Slot ${slotNumber} at ${item.managementName} canceled successfully!`);
+                      },
+                  },
+              ],
+              { cancelable: false }
+          );
+      } else {
+          // Check if the user has already reserved a slot
+          if (reservedSlots.length > 0) {
+              Alert.alert("Reservation Limit", "You can only reserve one slot at a time.", [
+                  {
+                      text: "OK",
+                      style: "default",
+                  },
+              ]);
+          } else {
+              setSelectedSlot(slotNumber);
+          }
+      }
+  };
+  
+  
 
     useEffect(() => {
         const slotDataRef = collection(db, "slot", item.managementName, "slotData");
@@ -348,72 +357,72 @@ export default function ReservationScreen({ route }) {
 
     const handleReservation = async () => {
       if (selectedSlot !== null && !reservedSlots.some(r => r.slotNumber === selectedSlot.slotNumber && r.floorTitle === selectedSlot.floorTitle)) {
-        Alert.alert(
-          'Confirm Reservation',
-          `Are you sure you want to reserve Slot ${selectedSlot}`,
-          [
-            {
-              text: 'Cancel',
-              style: 'cancel',
-            },
-            {
-              text: 'OK',
-              onPress: async () => {
-                let floorTitle = "General Parking";
-                let slotIndex = -1; // Initialize slotIndex
-                slotSets.forEach(set => {
-                  set.slots.forEach((slot, index) => {
-                    if (slot.slotNumber === selectedSlot) {
-                      floorTitle = set.title;
-                      slotIndex = index; // Reset index for each floor
-                    }
-                  });
-                });
-                const uniqueElement = new Date().getTime(); // Using timestamp for uniqueness
-                const uniqueSlotId = `slot_${selectedSlot.floorTitle}_${selectedSlot.slotNumber - 1}`;
-                const uniqueDocName = `slot_${floorTitle}_${slotIndex}`;
-                const reservationData = {
-                  userEmail: email,
-                  carPlateNumber: plateNumber || '',
-                  slotId: slotIndex,
-                  managementName: item.managementName,
-                  timestamp: new Date(),
-                  status: 'Reserved',
-                  currentLocation: location,
-                  floorTitle,
-                };
+          Alert.alert(
+              'Confirm Reservation',
+              `Are you sure you want to reserve Slot ${selectedSlot}?`,
+              [
+                  {
+                      text: 'Cancel',
+                      style: 'cancel',
+                  },
+                  {
+                      text: 'OK',
+                      onPress: async () => {
+                          let floorTitle = "General Parking";
+                          let slotIndex = -1;
+                          slotSets.forEach(set => {
+                              set.slots.forEach((slot, index) => {
+                                  if (slot.slotNumber === selectedSlot) {
+                                      floorTitle = set.title;
+                                      slotIndex = index;
+                                  }
+                              });
+                          });
+                          const reservationData = {
+                              userEmail: email,
+                              carPlateNumber: plateNumber || '',
+                              slotId: slotIndex,
+                              managementName: item.managementName,
+                              timestamp: new Date(),
+                              status: 'Reserved',
+                              currentLocation: location,
+                              floorTitle,
+                          };
   
-                try {
-                  const reservationsRef = collection(db, 'reservations');
-                  await setDoc(doc(reservationsRef, uniqueDocName), reservationData, { merge: true });
+                          try {
+                              const reservationsRef = collection(db, 'reservations');
+                              const uniqueDocName = `slot_${floorTitle}_${slotIndex}`;
+                              await setDoc(doc(reservationsRef, uniqueDocName), reservationData, { merge: true });
   
-                  setReservedSlots([...reservedSlots, selectedSlot]);
-                  setSelectedSlot(null);
-                  const notificationsRef = collection(db, 'notifications');
-                  const notificationData = {
-                    type: 'reservation',
-                    details: `A new reservation for slot ${selectedSlot} has been made`,
-                    timestamp: new Date(),
-                    managementName: item.managementName, 
-                    userEmail: email,
-                  };
-                  await addDoc(notificationsRef, notificationData);
-                  Alert.alert('Reservation Successful', `Slot ${selectedSlot} reserved successfully!`);
-                } catch (error) {
-                  console.error('Error saving reservation:', error);
-                  Alert.alert('Reservation Failed', 'Could not complete your reservation. Please try again.');
-                }
-              },
-            },
-          ],
-          { cancelable: false }
-        );
+                              setReservedSlots([...reservedSlots, { slotNumber: selectedSlot, managementName: item.managementName, parkingPay: item.parkingPay }]);
+                              setSelectedSlot(null);
+  
+                              const notificationsRef = collection(db, 'notifications');
+                              const notificationData = {
+                                  type: 'reservation',
+                                  details: `A new reservation for slot ${selectedSlot} has been made`,
+                                  timestamp: new Date(),
+                                  managementName: item.managementName, 
+                                  userEmail: email,
+                              };
+                              await addDoc(notificationsRef, notificationData);
+                              Alert.alert('Reservation Successful', `Slot ${selectedSlot} at ${item.managementName} reserved successfully!`);
+                          } catch (error) {
+                              console.error('Error saving reservation:', error);
+                              Alert.alert('Reservation Failed', 'Could not complete your reservation. Please try again.');
+                          }
+                      },
+                  },
+              ],
+              { cancelable: false }
+          );
       } else {
-        Alert.alert('Invalid Reservation', 'Please select a valid slot before reserving.', [
-          { text: 'OK', style: 'default' },
-        ]);
+          Alert.alert('Invalid Reservation', 'Please select a valid slot before reserving.', [
+              { text: 'OK', style: 'default' },
+          ]);
       }
-    };
+  };
+  
 
     const collectUserInfo = (slotId) => {
         const auth = getAuth();
@@ -566,22 +575,24 @@ export default function ReservationScreen({ route }) {
           color="#39e75f"
           accessibilityLabel="Reserve your selected parking slot"
         />
-        {reservedSlots.length > 0 && (
-          <View>
-            <Text style={styles.reservedSlotsText}>Slot Reservation Request</Text>
-            {reservedSlots.map((reservedSlot) => (
-              <View key={reservedSlot} style={styles.reservedSlotButton}>
-                <Text style={styles.slotButtonText}>{reservedSlot}</Text>
-              </View>
-            ))}
-            <View style={styles.slotContainer}></View>
-          </View>
-        )}
-        {reservedSlots.length > 0 && (
+      {reservedSlots.length > 0 && (
+      <View>
+        <Text style={styles.infoTextTitle}>Your Reservation</Text>
+         <View style={styles.divider} />
+        {reservedSlots.map((reservedSlot, index) => (
+            <View key={index} style={styles.reservedSlotButton}>
+                <Text style={styles.infoText}>Slot {reservedSlot.slotNumber} at {reservedSlot.managementName}</Text>
+                <Text style={styles.infoText2}>Total Amount {reservedSlot.parkingPay}.00
+                </Text>
+            </View>
+        ))}
+        </View>
+)}
+          {/* {reservedSlots.length > 0 && (
           <Text style={styles.totalAmountText}>
-            Total Amount: PHP {item.parkingPay}
+            Total Amount: PHP {fee}
           </Text>
-        )}
+        )} */}
       </View>
     </View>
   );
@@ -614,7 +625,7 @@ const styles = StyleSheet.create({
         backgroundColor: "#27ae60",
     },
     reservedSlotButton: {
-        backgroundColor: "red",
+        backgroundColor: "white",
     },
 
     scrollContainer: {
@@ -754,4 +765,48 @@ const styles = StyleSheet.create({
         height: "100%",
         resizeMode: "cover",
     },
+    infoContainer: {
+      padding: 20,
+      backgroundColor: "#fff",
+      borderTopLeftRadius: 45,
+      borderTopRightRadius: 45,
+      width: "100%",
+      position: "absolute",
+      bottom: 0, // Ensures that this container sits at the bottom
+      alignItems: "center",
+      justifyContent: "center",
+      shadowColor: "#FFD700",
+      shadowOffset: { width: 0, height: -3 },
+      shadowOpacity: 0.5,
+      shadowRadius: 5,
+      elevation: 30,
+      marginLeft: 20,
+    },
+    
+  infoTextTitle: {
+      fontSize: 18,
+      color: "#333",
+      fontFamily: 'Copperplate',
+      textAlign: 'left',
+      marginTop: 15
+  },
+
+  infoText: {
+    fontSize: 16,
+    color: "#333",
+    fontFamily: 'Arial',
+    marginTop:  5,
+},
+
+  infoText2: {
+    fontSize: 16,
+    color: "#FFAE42",
+    fontFamily: 'Arial',
+},
+  divider: {
+      width: "90%", // Makes the divider slightly shorter than the container width
+      height: 1, // Thin line
+      backgroundColor: "#ddd", // Light grey color
+      marginVertical: 8, // Adds space above and below the divider
+  },
 });
