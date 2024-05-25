@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import {View, Text, TextInput, StyleSheet, TouchableOpacity, Image, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth, db } from './config/firebase';
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { registerIndieID } from 'native-notify';
+import { doc, getDoc } from 'firebase/firestore';
 
 export function LoginScreen() {
-  const navigation = useNavigation();
 
+  const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -19,13 +20,11 @@ export function LoginScreen() {
   const handleForgotPassword = () => {
     navigation.navigate('Forgot');
   };
-
+  
   const handleLogin = async () => {
     try {
-
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
   
-    
       if (!userCredential || !userCredential.user) {
         console.error('User not found in userCredential');
         return;
@@ -34,110 +33,79 @@ export function LoginScreen() {
       const { user } = userCredential;
       console.log('Authentication successful for UID:', user.uid);
   
-  
+      try {
+        await registerIndieID(user.email, 21460, 'rLQ1cRoXNKwLkZE4aWOyKw');
+        console.log('Indie ID registration successful for UID:', user.email);
+      } catch (error) {
+        console.error('Error during Indie ID registration:', error);
+      }
       const userDocRef = doc(db, "user", user.uid);
-  
       const userDoc = await getDoc(userDocRef);
-  
       if (userDoc.exists()) {
         const userData = userDoc.data();
-    
-        navigation.navigate('Dashboard', { user: userData });
+        navigation.navigate('Dashboard', { user: userData, uid: user.uid });
       } else {
         console.error(`No user data found in Firestore for user: ${user.uid}`);
       }
     } catch (error) {
-      
       console.error('Error logging in:', error.message || error);
-  
     }
   };
+  
 
   const handleGoToSignIn = () => {
     navigation.navigate('SignUp');
   };
-  
+
   const handleRememberMe = () => {
     setRememberMe(!rememberMe);
   };
-  
-  
 
   return (
     <View style={styles.container}>
-     <Image
-  source={{ uri: 'https://i.imgur.com/LtYGuTl.png' }}
-  style={styles.backgroundImage}
-/>
-    <Image
-     source={{ uri: 'https://i.imgur.com/Tap1nZy.png' }}
-      style={[styles.backgroundImage, { borderTopLeftRadius: 130, marginTop: 100}]}
-    />
-    <Text style={{marginTop: 6, marginLeft: '35%', fontSize: 50, fontWeight: 'bold', color: 'white', marginVertical: 10}}>Login</Text>
-    <View style={styles.formContainer}>
-      <TextInput
-        value={email}
-        onChangeText={setEmail}
-        placeholder="Email"
-        style={styles.input}
-      />
-      <TextInput
-        value={password}
-        onChangeText={setPassword}
-        placeholder="Password"
-        secureTextEntry
-        style={styles.input}
-      />
-      <View style={styles.rememberMeContainer}>
-        <TouchableOpacity onPress={handleRememberMe} style={styles.checkbox}>
-          {rememberMe && <View style={styles.checkboxInner} />}
+      <Image source={{ uri: 'https://i.imgur.com/LtYGuTl.png' }} style={styles.backgroundImage} />
+      <Image source={{ uri: 'https://i.imgur.com/Tap1nZy.png' }} style={[styles.backgroundImage, { borderTopLeftRadius: 130, marginTop: 100 }]} />
+      <Text style={{ marginTop: 6, marginLeft: '35%', fontSize: 50, fontWeight: 'bold', color: 'white', marginVertical: 10 }}>Login</Text>
+      <View style={styles.formContainer}>
+        <TextInput value={email} onChangeText={setEmail} placeholder="Email" style={styles.input} />
+        <TextInput value={password} onChangeText={setPassword} placeholder="Password" secureTextEntry style={styles.input} />
+        <View style={styles.rememberMeContainer}>
+          <TouchableOpacity onPress={handleRememberMe} style={styles.checkbox}>
+            {rememberMe && <View style={styles.checkboxInner} />}
+          </TouchableOpacity>
+          <Text style={styles.rememberMeText}>Remember me</Text>
+          <TouchableOpacity onPress={() => navigation.navigate('Forgot')}>
+            <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+          </TouchableOpacity>
+        </View>
+        <TouchableOpacity style={styles.button2} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Sign In</Text>
         </TouchableOpacity>
-        <Text style={styles.rememberMeText}>Remember me</Text>
-        <TouchableOpacity onPress={handleForgotPassword}>
-          <Text style={styles.forgotPasswordText}>Forgot password?</Text>
+        <TouchableOpacity style={[styles.button, { borderColor: '#87CEEB' }]} onPress={handleGoToSignIn}>
+          <Text style={[styles.buttonText, { color: '#87CEEB' }]}>Create Account</Text>
         </TouchableOpacity>
-      </View>
-      <TouchableOpacity style={styles.button2} onPress={handleLogin}>
-        <Text style={styles.buttonText}>Sign In</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={[styles.button, {borderColor: '#87CEEB'}]} onPress={handleGoToSignIn}>
-      <Text style={[styles.buttonText, {color: '#87CEEB'}]}>Create Account</Text>
-      </TouchableOpacity>
-      <View style={styles.separator}>
+        <View style={styles.separator}>
           <View style={styles.line} />
           <Text style={styles.orText}>OR</Text>
           <View style={styles.line} />
         </View>
         <View style={styles.logoContainer}>
-  <TouchableOpacity style={styles.socialButton}>
-    <Image
-  source={{ uri: 'https://i.imgur.com/djoqq8E.png' }}
-        style={styles.logo}
-    />
-  </TouchableOpacity>
-  <TouchableOpacity style={styles.socialButton}>
-    <Image
-      source={{ uri: 'https://i.imgur.com/RHKsn28.png' }}
-      style={styles.logo2}
-    />
-  </TouchableOpacity>
-  <TouchableOpacity style={styles.socialButton}>
-    <Image
-  source={{ uri: 'https://i.imgur.com/yx3frJ6.png' }}
-        style={styles.logo2}
-    />
-         
-  </TouchableOpacity>
-</View>
-<TouchableOpacity onPress={handleGoToSignIn}>
-           <Text style={{color: '#d3d3d3', marginTop: 15, textAlign: 'center'}}>Dont have an account? <Text style={{color: '#FFD700', fontWeight: 'bold'}}>Signup</Text></Text>
-        </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={styles.socialButton}>
+            <Image source={{ uri: 'https://i.imgur.com/djoqq8E.png' }} style={styles.logo} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.socialButton}>
+            <Image source={{ uri: 'https://i.imgur.com/RHKsn28.png' }} style={styles.logo2} />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.socialButton}>
+            <Image source={{ uri: 'https://i.imgur.com/yx3frJ6.png' }} style={styles.logo2} />
+          </TouchableOpacity>
         </View>
- 
- 
-
-);
+        <TouchableOpacity onPress={handleGoToSignIn}>
+          <Text style={{ color: '#d3d3d3', marginTop: 15, textAlign: 'center' }}>Dont have an account? <Text style={{ color: '#FFD700', fontWeight: 'bold' }}>Signup</Text></Text>
+        </TouchableOpacity>
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -145,13 +113,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  signupText: {
-    color: 'red', // or any other color you prefer
-  },
   formContainer: {
     padding: 40,
     marginTop: '20%',
-    fontFamily: 'Courier New',
   },
   input: {
     backgroundColor: '#DEDEDE',
@@ -159,7 +123,6 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 15,
     fontSize: 16,
-    fontFamily: 'Courier New',
   },
   rememberMeContainer: {
     flexDirection: 'row',
@@ -185,12 +148,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#d3d3d3',
     fontWeight: 'bold',
-    fontFamily: 'Courier New',
   },
   forgotPasswordText: {
     fontSize: 14,
     color: '#FFD700',
-    fontFamily: 'Courier New',
     fontWeight: 'bold'
   },
   button: {
@@ -199,7 +160,6 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     alignItems: 'center',
     borderWidth: 2,
-
   },
   button2: {
     backgroundColor: '#39e75f',
@@ -211,8 +171,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 16,
-    fontFamily: 'Courier New',
-    
   },
   separator: {
     flexDirection: 'row',
@@ -230,21 +188,9 @@ const styles = StyleSheet.create({
     color: '#FFD700',
     marginBottom: 20,
   },
-  socialButton: {
-    paddingVertical: 15,
-    borderRadius: 5,
-    alignItems: 'center',
-    marginBottom: 10,
-    marginTop: 10,
-  },
-  socialButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontFamily: 'Courier New',
-  },
   logoContainer: {
-    flexDirection: 'row', // Arrange the logos side by side
-    justifyContent: 'space-around', // Space them evenly
+    flexDirection: 'row',
+    justifyContent: 'space-around',
     marginBottom: 10,
     marginTop: 10,
   },
@@ -261,14 +207,12 @@ const styles = StyleSheet.create({
     height: 50,
     resizeMode: 'contain',
   },
-
   backgroundImage: {
     ...StyleSheet.absoluteFillObject,
     width: '100%',
     height: '100%',
     resizeMode: 'cover',
   },
-
 });
 
 export default LoginScreen;

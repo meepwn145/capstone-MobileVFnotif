@@ -8,6 +8,7 @@ import NotificationsScreen from './Notification';
 import SearchScreen from './Search';
 import MapsScreen from './Map';
 import NextScreen from './Next';
+import registerNNPushToken from 'native-notify';
 import LoginScreen from './Login';
 import SignupScreen from './SignUp';
 import Profs from './Profiles'
@@ -25,6 +26,7 @@ import ReservationDetailsScreen from './reservationDetails';
 const Stack = createNativeStackNavigator();
 
 export default function App() {
+  registerNNPushToken(21460, 'rLQ1cRoXNKwLkZE4aWOyKw');
 
   return (
     

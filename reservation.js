@@ -6,17 +6,20 @@ import { collection, query, where, onSnapshot, addDoc, deleteDoc, getDocs, updat
 import Swiper from "react-native-swiper";
 import UserContext from "./UserContext";
 import firebase from "firebase/app";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { EmailAuthCredential, getAuth, onAuthStateChanged } from "firebase/auth";
 import { Button } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LocationStore } from "./store";
 import { useStoreState } from "pullstate";
 import style from "react-native-modal-picker/style";
 import RNPickerSelect from 'react-native-picker-select'; // Added import for RNPickerSelect
+import axios from 'axios'; // Import axios for sending the notification
 
 const SLOT_PRICE = 30;
 export default function ReservationScreen({ route }) {
+    const { uid } = route.params;
     const { item } = route.params;
+    const auth = getAuth();
     const navigation = useNavigation();
     const { user } = useContext(UserContext);
     const [email, setEmail] = useState(user?.email || "");
@@ -34,7 +37,6 @@ export default function ReservationScreen({ route }) {
     const [managementPrice, setManagementPrice] = useState (0);
     const [alertShown, setAlertShown] = useState(false); 
     const [fee, setFee] = useState('');
-
     useEffect(() => {
         const reservationsRef = collection(db, "reservations");
         const unsubscribe = onSnapshot(reservationsRef, (snapshot) => {
@@ -356,72 +358,90 @@ export default function ReservationScreen({ route }) {
     }, [db, item.managementName]);
 
     const handleReservation = async () => {
-      if (selectedSlot !== null && !reservedSlots.some(r => r.slotNumber === selectedSlot.slotNumber && r.floorTitle === selectedSlot.floorTitle)) {
+        if (selectedSlot !== null && !reservedSlots.some(r => r.slotNumber === selectedSlot.slotNumber && r.floorTitle === selectedSlot.floorTitle)) {
           Alert.alert(
-              'Confirm Reservation',
-              `Are you sure you want to reserve Slot ${selectedSlot}?`,
-              [
-                  {
-                      text: 'Cancel',
-                      style: 'cancel',
-                  },
-                  {
-                      text: 'OK',
-                      onPress: async () => {
-                          let floorTitle = "General Parking";
-                          let slotIndex = -1;
-                          slotSets.forEach(set => {
-                              set.slots.forEach((slot, index) => {
-                                  if (slot.slotNumber === selectedSlot) {
-                                      floorTitle = set.title;
-                                      slotIndex = index;
-                                  }
-                              });
-                          });
-                          const reservationData = {
-                              userEmail: email,
-                              carPlateNumber: plateNumber || '',
-                              slotId: slotIndex,
-                              managementName: item.managementName,
-                              timestamp: new Date(),
-                              status: 'Reserved',
-                              currentLocation: location,
-                              floorTitle,
-                          };
-  
-                          try {
-                              const reservationsRef = collection(db, 'reservations');
-                              const uniqueDocName = `slot_${floorTitle}_${slotIndex}`;
-                              await setDoc(doc(reservationsRef, uniqueDocName), reservationData, { merge: true });
-  
-                              setReservedSlots([...reservedSlots, { slotNumber: selectedSlot, managementName: item.managementName, parkingPay: item.parkingPay }]);
-                              setSelectedSlot(null);
-  
-                              const notificationsRef = collection(db, 'notifications');
-                              const notificationData = {
-                                  type: 'reservation',
-                                  details: `A new reservation for slot ${selectedSlot} has been made`,
-                                  timestamp: new Date(),
-                                  managementName: item.managementName, 
-                                  userEmail: email,
-                              };
-                              await addDoc(notificationsRef, notificationData);
-                              Alert.alert('Reservation Successful', `Slot ${selectedSlot} at ${item.managementName} reserved successfully!`);
-                          } catch (error) {
-                              console.error('Error saving reservation:', error);
-                              Alert.alert('Reservation Failed', 'Could not complete your reservation. Please try again.');
-                          }
-                      },
-                  },
-              ],
-              { cancelable: false }
+            'Confirm Reservation',
+            `Are you sure you want to reserve Slot ${selectedSlot}?`,
+            [
+              {
+                text: 'Cancel',
+                style: 'cancel',
+              },
+              {
+                text: 'OK',
+                onPress: async () => {
+                  let floorTitle = "General Parking";
+                  let slotIndex = -1;
+                  slotSets.forEach(set => {
+                    set.slots.forEach((slot, index) => {
+                      if (slot.slotNumber === selectedSlot) {
+                        floorTitle = set.title;
+                        slotIndex = index;
+                      }
+                    });
+                  });
+    
+                  const reservationData = {
+                    userEmail: email,
+                    carPlateNumber: plateNumber || '',
+                    slotId: slotIndex,
+                    managementName: item.managementName,
+                    timestamp: new Date(),
+                    status: 'Reserved',
+                    currentLocation: location,
+                    floorTitle,
+                  };
+    
+                  try {
+                    
+                    const reservationsRef = collection(db, 'reservations');
+                    const uniqueDocName = `slot_${floorTitle}_${slotIndex}`;
+                    await setDoc(doc(reservationsRef, uniqueDocName), reservationData, { merge: true });
+    
+                    setReservedSlots([...reservedSlots, { slotNumber: selectedSlot, managementName: item.managementName, parkingPay: item.parkingPay }]);
+                    setSelectedSlot(null);
+    
+                    const notificationsRef = collection(db, 'notifications');
+                    const notificationData = {
+                      type: 'reservation',
+                      details: `A new reservation for slot ${selectedSlot} has been made`,
+                      timestamp: new Date(),
+                      managementName: item.managementName, 
+                      userEmail: email, 
+                    };
+                    await addDoc(notificationsRef, notificationData);
+
+                    await axios.post('https://app.nativenotify.com/api/indie/notification', {
+                      subID: email, 
+                      appId: 21460,
+                      appToken: 'rLQ1cRoXNKwLkZE4aWOyKw',
+                      title: 'Slot Reserved',
+                      message: `You have successfully reserved Slot ${selectedSlot} at ${item.managementName}.`,
+                    })
+                    
+                    .then(response => {
+                      console.log('Notification sent successfully', response.data);
+                    })
+                    .catch(error => {
+                      console.error('Error sending notification:', error);
+                    });
+    
+                    Alert.alert('Reservation Successful', `Slot ${selectedSlot} at ${item.managementName} reserved successfully!`);
+                  } catch (error) {
+                    console.error('Error saving reservation:', error);
+                    Alert.alert('Reservation Failed', 'Could not complete your reservation. Please try again.');
+                  }
+                },
+              },
+            ],
+            { cancelable: false }
           );
-      } else {
+        } else {
           Alert.alert('Invalid Reservation', 'Please select a valid slot before reserving.', [
-              { text: 'OK', style: 'default' },
+            { text: 'OK', style: 'default' },
           ]);
-      }
-  };
+        }
+      };
   
 
     const collectUserInfo = (slotId) => {
@@ -570,6 +590,7 @@ export default function ReservationScreen({ route }) {
           />
         </View>
         <Button
+        
           title="Reserve Slot"
           onPress={handleReservation}
           color="#39e75f"
